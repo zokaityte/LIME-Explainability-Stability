@@ -1,3 +1,5 @@
+# Testing script
+
 import time
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.datasets import make_classification
@@ -7,7 +9,7 @@ from lime.lime_tabular import LimeTabularExplainer
 def interpret_data(X, y, func):
     explainer = LimeTabularExplainer(X, discretize_continuous=False, kernel_width=3)
     times, scores = [], []
-    for r_idx in range(1000):
+    for r_idx in range(5):
         start_time = time.time()
         explanation = explainer.explain_instance(X[r_idx, :], func)
         times.append(time.time() - start_time)
@@ -24,5 +26,5 @@ if __name__ == '__main__':
     y_hat = clf.predict_proba(X_raw)
 
     times, scores = interpret_data(X_raw, y_hat, clf.predict_proba)
+
     print('%9.4fs %9.4fs %9.4fs' % (min(times), sum(times) / len(times), max(times)))
-    print('%9.4f %9.4f% 9.4f' % (min(scores), sum(scores) / len(scores), max(scores)))
