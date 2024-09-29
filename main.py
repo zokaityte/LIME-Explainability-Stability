@@ -1,5 +1,4 @@
 # Testing script
-
 from sklearn.datasets import make_classification
 from sklearn.ensemble import RandomForestClassifier
 from lime.lime_tabular import LimeTabularExplainer
@@ -15,15 +14,13 @@ def test_lime_tabular_explainer():
     clf.fit(x_raw, y_raw)
 
     # Initialize LimeTabularExplainer
-    explainer = LimeTabularExplainer(x_raw, kernel_width=3, random_state=42)
+    explainer = LimeTabularExplainer(x_raw, kernel_width=3, random_state=42, sample_around_instance=False)
+    # TODO investigate the effect of sample_around_instance. Sample around instance is set to default False
 
     # Explain single instance
     explanation = explainer.explain_instance(x_raw[0, :], clf.predict_proba)
 
-    # Feature impact
-    feature_importance = explanation.as_list()
-
-    assert feature_importance == [('3', 0.043831946522315667), ('2', -0.043577987862162285), ('0', 0.03887729586806089), ('4', 0.019489294650031276), ('1', -0.014745938524001936)]
+    assert explanation.as_list() == [('3', 0.043831946522315667), ('2', -0.043577987862162285), ('0', 0.03887729586806089), ('4', 0.019489294650031276), ('1', -0.014745938524001936)]
 
 
 
