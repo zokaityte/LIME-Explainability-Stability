@@ -4,7 +4,6 @@ Functions for explaining classifiers that use tabular data (matrices).
 import collections
 import copy
 from functools import partial
-import json
 import warnings
 
 import numpy as np
@@ -16,7 +15,7 @@ from pyDOE2 import lhs
 from scipy.stats.distributions import norm
 
 from . import explanation
-from . import lime_base
+from .lime_base import LimeBase
 
 
 class TableDomainMapper(explanation.DomainMapper):
@@ -55,54 +54,6 @@ class TableDomainMapper(explanation.DomainMapper):
         """
         names = self.exp_feature_names
         return [(names[x[0]], x[1]) for x in exp]
-
-    def visualize_instance_html(self,
-                                exp,
-                                label,
-                                div_name,
-                                exp_object_name,
-                                show_table=True,
-                                show_all=False):
-        """Shows the current example in a table format.
-
-        Args:
-             exp: list of tuples [(id, weight), (id,weight)]
-             label: label id (integer)
-             div_name: name of div object to be used for rendering(in js)
-             exp_object_name: name of js explanation object
-             show_table: if False, don't show table visualization.
-             show_all: if True, show zero-weighted features in the table.
-        """
-        if not show_table:
-            return ''
-        weights = [0] * len(self.feature_names)
-        for x in exp:
-            weights[x[0]] = x[1]
-        if self.feature_indexes is not None:
-            # Sparse case: only display the non-zero values and importances
-            fnames = [self.exp_feature_names[i] for i in self.feature_indexes]
-            fweights = [weights[i] for i in self.feature_indexes]
-            if show_all:
-                out_list = list(zip(fnames,
-                                    self.feature_values,
-                                    fweights))
-            else:
-                out_dict = dict(map(lambda x: (x[0], (x[1], x[2], x[3])),
-                                zip(self.feature_indexes,
-                                    fnames,
-                                    self.feature_values,
-                                    fweights)))
-                out_list = [out_dict.get(x[0], (str(x[0]), 0.0, 0.0)) for x in exp]
-        else:
-            out_list = list(zip(self.exp_feature_names,
-                                self.feature_values,
-                                weights))
-            if not show_all:
-                out_list = [out_list[x[0]] for x in exp]
-        ret = u'''
-            %s.show_raw_tabular(%s, %d, %s);
-        ''' % (exp_object_name, json.dumps(out_list, ensure_ascii=False), label, div_name)
-        return ret
 
 
 class LimeTabularExplainer(object):
@@ -185,7 +136,7 @@ class LimeTabularExplainer(object):
         kernel_fn = partial(kernel, kernel_width=kernel_width)
 
         self.feature_selection = feature_selection
-        self.base = lime_base.LimeBase(kernel_fn, verbose, random_state=self.random_state)
+        self.base = LimeBase(kernel_fn, verbose, random_state=self.random_state)
         self.class_names = class_names
 
         # Though set has no role to play if training data stats are provided
@@ -209,17 +160,6 @@ class LimeTabularExplainer(object):
     @staticmethod
     def convert_and_round(values):
         return ['%.2f' % v for v in values]
-
-    @staticmethod
-    def validate_training_data_stats(training_data_stats):
-        """
-            Method to validate the structure of training data stats
-        """
-        stat_keys = list(training_data_stats.keys())
-        valid_stat_keys = ["means", "mins", "maxs", "stds", "feature_values", "feature_frequencies"]
-        missing_keys = list(set(valid_stat_keys) - set(stat_keys))
-        if len(missing_keys) > 0:
-            raise Exception("Missing keys in training_data_stats. Details: %s" % (missing_keys))
 
     def explain_instance(self,
                          data_row,
@@ -268,7 +208,7 @@ class LimeTabularExplainer(object):
         if sp.sparse.issparse(data_row) and not sp.sparse.isspmatrix_csr(data_row):
             # Preventative code: if sparse, convert to csr format if not in csr format already
             data_row = data_row.tocsr()
-        data, inverse = self.__data_inverse(data_row, num_samples, sampling_method)
+        data, inverse = self.__generate_neighborhood_data_inverse(data_row, num_samples, sampling_method)
         if sp.sparse.issparse(data):
             # Note in sparse case we don't subtract mean since data would become dense
             scaled_data = data.multiply(self.scaler.scale_)
@@ -291,9 +231,7 @@ class LimeTabularExplainer(object):
             if len(yss.shape) == 1:
                 raise NotImplementedError("LIME does not currently support "
                                           "classifier models without probability "
-                                          "scores. If this conflicts with your "
-                                          "use case, please let us know: "
-                                          "https://github.com/datascienceinc/lime/issues/16")
+                                          "scores.")
             elif len(yss.shape) == 2:
                 if self.class_names is None:
                     self.class_names = [str(x) for x in range(yss[0].shape[0])]
@@ -385,10 +323,10 @@ class LimeTabularExplainer(object):
 
         return ret_exp
 
-    def __data_inverse(self,
-                       data_row,
-                       num_samples,
-                       sampling_method):
+    def __generate_neighborhood_data_inverse(self,
+                                             data_row,
+                                             num_samples,
+                                             sampling_method):
         """Generates a neighborhood around a prediction.
 
         For numerical features, perturb them by sampling from a Normal(0,1) and
