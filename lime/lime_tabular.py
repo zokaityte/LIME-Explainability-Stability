@@ -15,11 +15,6 @@ from sklearn.utils import check_random_state
 from pyDOE2 import lhs
 from scipy.stats.distributions import norm
 
-from lime.discretize import QuartileDiscretizer
-from lime.discretize import DecileDiscretizer
-from lime.discretize import EntropyDiscretizer
-from lime.discretize import BaseDiscretizer
-from lime.discretize import StatsDiscretizer
 from . import explanation
 from . import lime_base
 
@@ -135,8 +130,6 @@ class LimeTabularExplainer(object):
                  verbose=False,
                  class_names=None,
                  feature_selection='auto',
-                 discretize_continuous=True,
-                 discretizer='quartile',
                  sample_around_instance=False,
                  random_state=None,
                  training_data_stats=None):
@@ -168,11 +161,6 @@ class LimeTabularExplainer(object):
                 'forward_selection', 'lasso_path', 'none' or 'auto'.
                 See function 'explain_instance_with_data' in lime_base.py for
                 details on what each of the options does.
-            discretize_continuous: if True, all non-categorical features will
-                be discretized into quartiles.
-            discretizer: only matters if discretize_continuous is True
-                and data is not sparse. Options are 'quartile', 'decile',
-                'entropy' or a BaseDiscretizer instance.
             sample_around_instance: if True, will sample continuous features
                 in perturbed samples from a normal centered at the instance
                 being explained. Otherwise, the normal is centered on the mean
@@ -204,44 +192,6 @@ class LimeTabularExplainer(object):
         self.categorical_features = list(categorical_features)
         self.feature_names = list(feature_names)
 
-        self.discretizer = None
-        if discretize_continuous and not sp.sparse.issparse(training_data):
-            # Set the discretizer if training data stats are provided
-            if self.training_data_stats:
-                discretizer = StatsDiscretizer(
-                    training_data, self.categorical_features,
-                    self.feature_names, labels=training_labels,
-                    data_stats=self.training_data_stats,
-                    random_state=self.random_state)
-
-            if discretizer == 'quartile':
-                self.discretizer = QuartileDiscretizer(
-                        training_data, self.categorical_features,
-                        self.feature_names, labels=training_labels,
-                        random_state=self.random_state)
-            elif discretizer == 'decile':
-                self.discretizer = DecileDiscretizer(
-                        training_data, self.categorical_features,
-                        self.feature_names, labels=training_labels,
-                        random_state=self.random_state)
-            elif discretizer == 'entropy':
-                self.discretizer = EntropyDiscretizer(
-                        training_data, self.categorical_features,
-                        self.feature_names, labels=training_labels,
-                        random_state=self.random_state)
-            elif isinstance(discretizer, BaseDiscretizer):
-                self.discretizer = discretizer
-            else:
-                raise ValueError('''Discretizer must be 'quartile',''' +
-                                 ''' 'decile', 'entropy' or a''' +
-                                 ''' BaseDiscretizer instance''')
-            self.categorical_features = list(range(training_data.shape[1]))
-
-            # Get the discretized_training_data when the stats are not provided
-            if(self.training_data_stats is None):
-                discretized_training_data = self.discretizer.discretize(
-                    training_data)
-
         if kernel_width is None:
             kernel_width = np.sqrt(training_data.shape[1]) * .75
         kernel_width = float(kernel_width)
@@ -264,10 +214,7 @@ class LimeTabularExplainer(object):
 
         for feature in self.categorical_features:
             if training_data_stats is None:
-                if self.discretizer is not None:
-                    column = discretized_training_data[:, feature]
-                else:
-                    column = training_data[:, feature]
+                column = training_data[:, feature]
 
                 feature_count = collections.Counter(column)
                 values, frequencies = map(list, zip(*(sorted(feature_count.items()))))
@@ -424,13 +371,6 @@ class LimeTabularExplainer(object):
         categorical_features = self.categorical_features
 
         discretized_feature_names = None
-        if self.discretizer is not None:
-            categorical_features = range(data.shape[1])
-            discretized_instance = self.discretizer.discretize(data_row)
-            discretized_feature_names = copy.deepcopy(feature_names)
-            for f in self.discretizer.names:
-                discretized_feature_names[f] = self.discretizer.names[f][int(
-                        discretized_instance[f])]
 
         domain_mapper = TableDomainMapper(feature_names,
                                           values,
@@ -506,60 +446,57 @@ class LimeTabularExplainer(object):
             num_cols = data_row.shape[0]
             data = np.zeros((num_samples, num_cols))
         categorical_features = range(num_cols)
-        if self.discretizer is None:
-            instance_sample = data_row
-            scale = self.scaler.scale_
-            mean = self.scaler.mean_
-            if is_sparse:
-                # Perturb only the non-zero values
-                non_zero_indexes = data_row.nonzero()[1]
-                num_cols = len(non_zero_indexes)
-                instance_sample = data_row[:, non_zero_indexes]
-                scale = scale[non_zero_indexes]
-                mean = mean[non_zero_indexes]
+        instance_sample = data_row
+        scale = self.scaler.scale_
+        mean = self.scaler.mean_
+        if is_sparse:
+            # Perturb only the non-zero values
+            non_zero_indexes = data_row.nonzero()[1]
+            num_cols = len(non_zero_indexes)
+            instance_sample = data_row[:, non_zero_indexes]
+            scale = scale[non_zero_indexes]
+            mean = mean[non_zero_indexes]
 
-            if sampling_method == 'gaussian':
-                data = self.random_state.normal(0, 1, num_samples * num_cols
-                                                ).reshape(num_samples, num_cols)
-                data = np.array(data)
-            elif sampling_method == 'lhs':
-                data = lhs(num_cols, samples=num_samples
-                           ).reshape(num_samples, num_cols)
-                means = np.zeros(num_cols)
-                stdvs = np.array([1]*num_cols)
-                for i in range(num_cols):
-                    data[:, i] = norm(loc=means[i], scale=stdvs[i]).ppf(data[:, i])
-                data = np.array(data)
-            else:
-                warnings.warn('''Invalid input for sampling_method.
-                                 Defaulting to Gaussian sampling.''', UserWarning)
-                data = self.random_state.normal(0, 1, num_samples * num_cols
-                                                ).reshape(num_samples, num_cols)
-                data = np.array(data)
-
-            if self.sample_around_instance:
-                data = data * scale + instance_sample
-            else:
-                data = data * scale + mean
-            if is_sparse:
-                if num_cols == 0:
-                    data = sp.sparse.csr_matrix((num_samples,
-                                                 data_row.shape[1]),
-                                                dtype=data_row.dtype)
-                else:
-                    indexes = np.tile(non_zero_indexes, num_samples)
-                    indptr = np.array(
-                        range(0, len(non_zero_indexes) * (num_samples + 1),
-                              len(non_zero_indexes)))
-                    data_1d_shape = data.shape[0] * data.shape[1]
-                    data_1d = data.reshape(data_1d_shape)
-                    data = sp.sparse.csr_matrix(
-                        (data_1d, indexes, indptr),
-                        shape=(num_samples, data_row.shape[1]))
-            categorical_features = self.categorical_features
-            first_row = data_row
+        if sampling_method == 'gaussian':
+            data = self.random_state.normal(0, 1, num_samples * num_cols
+                                            ).reshape(num_samples, num_cols)
+            data = np.array(data)
+        elif sampling_method == 'lhs':
+            data = lhs(num_cols, samples=num_samples
+                       ).reshape(num_samples, num_cols)
+            means = np.zeros(num_cols)
+            stdvs = np.array([1]*num_cols)
+            for i in range(num_cols):
+                data[:, i] = norm(loc=means[i], scale=stdvs[i]).ppf(data[:, i])
+            data = np.array(data)
         else:
-            first_row = self.discretizer.discretize(data_row)
+            warnings.warn('''Invalid input for sampling_method.
+                             Defaulting to Gaussian sampling.''', UserWarning)
+            data = self.random_state.normal(0, 1, num_samples * num_cols
+                                            ).reshape(num_samples, num_cols)
+            data = np.array(data)
+
+        if self.sample_around_instance:
+            data = data * scale + instance_sample
+        else:
+            data = data * scale + mean
+        if is_sparse:
+            if num_cols == 0:
+                data = sp.sparse.csr_matrix((num_samples,
+                                             data_row.shape[1]),
+                                            dtype=data_row.dtype)
+            else:
+                indexes = np.tile(non_zero_indexes, num_samples)
+                indptr = np.array(
+                    range(0, len(non_zero_indexes) * (num_samples + 1),
+                          len(non_zero_indexes)))
+                data_1d_shape = data.shape[0] * data.shape[1]
+                data_1d = data.reshape(data_1d_shape)
+                data = sp.sparse.csr_matrix(
+                    (data_1d, indexes, indptr),
+                    shape=(num_samples, data_row.shape[1]))
+        categorical_features = self.categorical_features
+        first_row = data_row
         data[0] = data_row.copy()
         inverse = data.copy()
         for column in categorical_features:
@@ -572,8 +509,6 @@ class LimeTabularExplainer(object):
             inverse_column[0] = data[0, column]
             data[:, column] = binary_column
             inverse[:, column] = inverse_column
-        if self.discretizer is not None:
-            inverse[1:] = self.discretizer.undiscretize(inverse[1:])
         inverse[0] = data_row
         return data, inverse
 

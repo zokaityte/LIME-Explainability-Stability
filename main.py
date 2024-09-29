@@ -15,7 +15,7 @@ def test_lime_tabular_explainer():
     clf.fit(x_raw, y_raw)
 
     # Initialize LimeTabularExplainer
-    explainer = LimeTabularExplainer(x_raw, discretize_continuous=False, kernel_width=3, random_state=42)
+    explainer = LimeTabularExplainer(x_raw, kernel_width=3, random_state=42)
 
     # Explain single instance
     explanation = explainer.explain_instance(x_raw[0, :], clf.predict_proba)
