@@ -23,8 +23,7 @@ class TableDomainMapper(explanation.DomainMapper):
     """Maps feature ids to names, generates table views, etc"""
 
     def __init__(self, feature_names, feature_values, scaled_row,
-                 categorical_features, discretized_feature_names=None,
-                 feature_indexes=None):
+                 categorical_features, feature_indexes=None):
         """Init.
 
         Args:
@@ -35,7 +34,6 @@ class TableDomainMapper(explanation.DomainMapper):
             feature_indexes: optional feature indexes used in the sparse case
         """
         self.exp_feature_names = feature_names
-        self.discretized_feature_names = discretized_feature_names
         self.feature_names = feature_names
         self.feature_values = feature_values
         self.feature_indexes = feature_indexes
@@ -56,8 +54,6 @@ class TableDomainMapper(explanation.DomainMapper):
             list of tuples (feature_name, weight)
         """
         names = self.exp_feature_names
-        if self.discretized_feature_names is not None:
-            names = self.discretized_feature_names
         return [(names[x[0]], x[1]) for x in exp]
 
     def visualize_instance_html(self,
@@ -121,7 +117,6 @@ class LimeTabularExplainer(object):
     def __init__(self,
                  training_data,
                  mode="classification",
-                 training_labels=None,
                  feature_names=None,
                  categorical_features=None,
                  categorical_names=None,
@@ -131,15 +126,12 @@ class LimeTabularExplainer(object):
                  class_names=None,
                  feature_selection='auto',
                  sample_around_instance=False,
-                 random_state=None,
-                 training_data_stats=None):
+                 random_state=None):
         """Init function.
 
         Args:
             training_data: numpy 2d array
             mode: "classification" or "regression"
-            training_labels: labels for training data. Not required, but may be
-                used by discretizer.
             feature_names: list of names (strings) corresponding to the columns
                 in the training data.
             categorical_features: list of indices (ints) corresponding to the
@@ -168,21 +160,11 @@ class LimeTabularExplainer(object):
             random_state: an integer or numpy.RandomState that will be used to
                 generate random numbers. If None, the random state will be
                 initialized using the internal numpy seed.
-            training_data_stats: a dict object having the details of training data
-                statistics. If None, training data information will be used, only matters
-                if discretize_continuous is True. Must have the following keys:
-                means", "mins", "maxs", "stds", "feature_values",
-                "feature_frequencies"
         """
         self.random_state = check_random_state(random_state)
         self.mode = mode
         self.categorical_names = categorical_names or {}
         self.sample_around_instance = sample_around_instance
-        self.training_data_stats = training_data_stats
-
-        # Check and raise proper error in stats are supplied in non-descritized path
-        if self.training_data_stats:
-            self.validate_training_data_stats(self.training_data_stats)
 
         if categorical_features is None:
             categorical_features = []
@@ -213,14 +195,10 @@ class LimeTabularExplainer(object):
         self.feature_frequencies = {}
 
         for feature in self.categorical_features:
-            if training_data_stats is None:
-                column = training_data[:, feature]
+            column = training_data[:, feature]
 
-                feature_count = collections.Counter(column)
-                values, frequencies = map(list, zip(*(sorted(feature_count.items()))))
-            else:
-                values = training_data_stats["feature_values"][feature]
-                frequencies = training_data_stats["feature_frequencies"][feature]
+            feature_count = collections.Counter(column)
+            values, frequencies = map(list, zip(*(sorted(feature_count.items()))))
 
             self.feature_values[feature] = values
             self.feature_frequencies[feature] = (np.array(frequencies) /
@@ -361,8 +339,6 @@ class LimeTabularExplainer(object):
             feature_indexes = None
 
         for i in self.categorical_features:
-            if self.discretizer is not None and i in self.discretizer.lambdas:
-                continue
             name = int(data_row[i])
             if i in self.categorical_names:
                 name = self.categorical_names[i][name]
@@ -370,13 +346,10 @@ class LimeTabularExplainer(object):
             values[i] = 'True'
         categorical_features = self.categorical_features
 
-        discretized_feature_names = None
-
         domain_mapper = TableDomainMapper(feature_names,
                                           values,
                                           scaled_data[0],
                                           categorical_features=categorical_features,
-                                          discretized_feature_names=discretized_feature_names,
                                           feature_indexes=feature_indexes)
         ret_exp = explanation.Explanation(domain_mapper,
                                           mode=self.mode,
@@ -511,155 +484,3 @@ class LimeTabularExplainer(object):
             inverse[:, column] = inverse_column
         inverse[0] = data_row
         return data, inverse
-
-
-class RecurrentTabularExplainer(LimeTabularExplainer):
-    """
-    An explainer for keras-style recurrent neural networks, where the
-    input shape is (n_samples, n_timesteps, n_features). This class
-    just extends the LimeTabularExplainer class and reshapes the training
-    data and feature names such that they become something like
-
-    (val1_t1, val1_t2, val1_t3, ..., val2_t1, ..., valn_tn)
-
-    Each of the methods that take data reshape it appropriately,
-    so you can pass in the training/testing data exactly as you
-    would to the recurrent neural network.
-
-    """
-
-    def __init__(self, training_data, mode="classification",
-                 training_labels=None, feature_names=None,
-                 categorical_features=None, categorical_names=None,
-                 kernel_width=None, kernel=None, verbose=False, class_names=None,
-                 feature_selection='auto', discretize_continuous=True,
-                 discretizer='quartile', random_state=None):
-        """
-        Args:
-            training_data: numpy 3d array with shape
-                (n_samples, n_timesteps, n_features)
-            mode: "classification" or "regression"
-            training_labels: labels for training data. Not required, but may be
-                used by discretizer.
-            feature_names: list of names (strings) corresponding to the columns
-                in the training data.
-            categorical_features: list of indices (ints) corresponding to the
-                categorical columns. Everything else will be considered
-                continuous. Values in these columns MUST be integers.
-            categorical_names: map from int to list of names, where
-                categorical_names[x][y] represents the name of the yth value of
-                column x.
-            kernel_width: kernel width for the exponential kernel.
-            If None, defaults to sqrt(number of columns) * 0.75
-            kernel: similarity kernel that takes euclidean distances and kernel
-                width as input and outputs weights in (0,1). If None, defaults to
-                an exponential kernel.
-            verbose: if true, print local prediction values from linear model
-            class_names: list of class names, ordered according to whatever the
-                classifier is using. If not present, class names will be '0',
-                '1', ...
-            feature_selection: feature selection method. can be
-                'forward_selection', 'lasso_path', 'none' or 'auto'.
-                See function 'explain_instance_with_data' in lime_base.py for
-                details on what each of the options does.
-            discretize_continuous: if True, all non-categorical features will
-                be discretized into quartiles.
-            discretizer: only matters if discretize_continuous is True. Options
-                are 'quartile', 'decile', 'entropy' or a BaseDiscretizer
-                instance.
-            random_state: an integer or numpy.RandomState that will be used to
-                generate random numbers. If None, the random state will be
-                initialized using the internal numpy seed.
-        """
-
-        # Reshape X
-        n_samples, n_timesteps, n_features = training_data.shape
-        training_data = np.transpose(training_data, axes=(0, 2, 1)).reshape(
-                n_samples, n_timesteps * n_features)
-        self.n_timesteps = n_timesteps
-        self.n_features = n_features
-        if feature_names is None:
-            feature_names = ['feature%d' % i for i in range(n_features)]
-
-        # Update the feature names
-        feature_names = ['{}_t-{}'.format(n, n_timesteps - (i + 1))
-                         for n in feature_names for i in range(n_timesteps)]
-
-        # Send off the the super class to do its magic.
-        super(RecurrentTabularExplainer, self).__init__(
-                training_data,
-                mode=mode,
-                training_labels=training_labels,
-                feature_names=feature_names,
-                categorical_features=categorical_features,
-                categorical_names=categorical_names,
-                kernel_width=kernel_width,
-                kernel=kernel,
-                verbose=verbose,
-                class_names=class_names,
-                feature_selection=feature_selection,
-                discretize_continuous=discretize_continuous,
-                discretizer=discretizer,
-                random_state=random_state)
-
-    def _make_predict_proba(self, func):
-        """
-        The predict_proba method will expect 3d arrays, but we are reshaping
-        them to 2D so that LIME works correctly. This wraps the function
-        you give in explain_instance to first reshape the data to have
-        the shape the the keras-style network expects.
-        """
-
-        def predict_proba(X):
-            n_samples = X.shape[0]
-            new_shape = (n_samples, self.n_features, self.n_timesteps)
-            X = np.transpose(X.reshape(new_shape), axes=(0, 2, 1))
-            return func(X)
-
-        return predict_proba
-
-    def explain_instance(self, data_row, classifier_fn, labels=(1,),
-                         top_labels=None, num_features=10, num_samples=5000,
-                         distance_metric='euclidean', model_regressor=None):
-        """Generates explanations for a prediction.
-
-        First, we generate neighborhood data by randomly perturbing features
-        from the instance (see __data_inverse). We then learn locally weighted
-        linear models on this neighborhood data to explain each of the classes
-        in an interpretable way (see lime_base.py).
-
-        Args:
-            data_row: 2d numpy array, corresponding to a row
-            classifier_fn: classifier prediction probability function, which
-                takes a numpy array and outputs prediction probabilities. For
-                ScikitClassifiers , this is classifier.predict_proba.
-            labels: iterable with labels to be explained.
-            top_labels: if not None, ignore labels and produce explanations for
-                the K labels with highest prediction probabilities, where K is
-                this parameter.
-            num_features: maximum number of features present in explanation
-            num_samples: size of the neighborhood to learn the linear model
-            distance_metric: the distance metric to use for weights.
-            model_regressor: sklearn regressor to use in explanation. Defaults
-                to Ridge regression in LimeBase. Must have
-                model_regressor.coef_ and 'sample_weight' as a parameter
-                to model_regressor.fit()
-
-        Returns:
-            An Explanation object (see explanation.py) with the corresponding
-            explanations.
-        """
-
-        # Flatten input so that the normal explainer can handle it
-        data_row = data_row.T.reshape(self.n_timesteps * self.n_features)
-
-        # Wrap the classifier to reshape input
-        classifier_fn = self._make_predict_proba(classifier_fn)
-        return super(RecurrentTabularExplainer, self).explain_instance(
-            data_row, classifier_fn,
-            labels=labels,
-            top_labels=top_labels,
-            num_features=num_features,
-            num_samples=num_samples,
-            distance_metric=distance_metric,
-            model_regressor=model_regressor)
