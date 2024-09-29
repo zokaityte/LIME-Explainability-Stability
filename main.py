@@ -1,30 +1,31 @@
 # Testing script
 
-import time
-from sklearn.ensemble import RandomForestClassifier
 from sklearn.datasets import make_classification
+from sklearn.ensemble import RandomForestClassifier
 from lime.lime_tabular import LimeTabularExplainer
 
 
-def interpret_data(X, y, func):
-    explainer = LimeTabularExplainer(X, discretize_continuous=False, kernel_width=3)
-    times, scores = [], []
-    for r_idx in range(5):
-        start_time = time.time()
-        explanation = explainer.explain_instance(X[r_idx, :], func)
-        times.append(time.time() - start_time)
-        scores.append(explanation.score)
-        print('...')
+def test_lime_tabular_explainer():
 
-    return times, scores
+    # Generate classification data
+    x_raw, y_raw = make_classification(n_classes=3, n_features=5, n_informative=3, n_samples=10, random_state=42)
+
+    # Train classifier
+    clf = RandomForestClassifier(random_state=42)
+    clf.fit(x_raw, y_raw)
+
+    # Initialize LimeTabularExplainer
+    explainer = LimeTabularExplainer(x_raw, discretize_continuous=False, kernel_width=3, random_state=42)
+
+    # Explain single instance
+    explanation = explainer.explain_instance(x_raw[0, :], clf.predict_proba)
+
+    # Feature impact
+    feature_importance = explanation.as_list()
+
+    assert feature_importance == [('3', 0.043831946522315667), ('2', -0.043577987862162285), ('0', 0.03887729586806089), ('4', 0.019489294650031276), ('1', -0.014745938524001936)]
+
 
 
 if __name__ == '__main__':
-    X_raw, y_raw = make_classification(n_classes=2, n_features=1000, n_samples=1000)
-    clf = RandomForestClassifier()
-    clf.fit(X_raw, y_raw)
-    y_hat = clf.predict_proba(X_raw)
-
-    times, scores = interpret_data(X_raw, y_hat, clf.predict_proba)
-
-    print('%9.4fs %9.4fs %9.4fs' % (min(times), sum(times) / len(times), max(times)))
+    test_lime_tabular_explainer()
