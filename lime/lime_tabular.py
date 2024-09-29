@@ -208,7 +208,7 @@ class LimeTabularExplainer(object):
         if sp.sparse.issparse(data_row) and not sp.sparse.isspmatrix_csr(data_row):
             # Preventative code: if sparse, convert to csr format if not in csr format already
             data_row = data_row.tocsr()
-        data, inverse = self.__generate_neighborhood_data_inverse(data_row, num_samples, sampling_method)
+        data, inverse = self._generate_neighborhood_data_inverse(data_row, num_samples, sampling_method)
         if sp.sparse.issparse(data):
             # Note in sparse case we don't subtract mean since data would become dense
             scaled_data = data.multiply(self.scaler.scale_)
@@ -323,102 +323,96 @@ class LimeTabularExplainer(object):
 
         return ret_exp
 
-    def __generate_neighborhood_data_inverse(self,
+    def _generate_neighborhood_data_inverse(self,
                                              data_row,
                                              num_samples,
                                              sampling_method):
-        """Generates a neighborhood around a prediction.
+        """Generates a neighborhood around a prediction with numerical and categorical features perturbed."""
 
-        For numerical features, perturb them by sampling from a Normal(0,1) and
-        doing the inverse operation of mean-centering and scaling, according to
-        the means and stds in the training data. For categorical features,
-        perturb by sampling according to the training distribution, and making
-        a binary feature that is 1 when the value is the same as the instance
-        being explained.
-
-        Args:
-            data_row: 1d numpy array, corresponding to a row
-            num_samples: size of the neighborhood to learn the linear model
-            sampling_method: 'gaussian' or 'lhs'
-
-        Returns:
-            A tuple (data, inverse), where:
-                data: dense num_samples * K matrix, where categorical features
-                are encoded with either 0 (not equal to the corresponding value
-                in data_row) or 1. The first row is the original instance.
-                inverse: same as data, except the categorical features are not
-                binary, but categorical (as the original data)
-        """
+        # Check if the data is sparse and separate handling
         is_sparse = sp.sparse.issparse(data_row)
-        if is_sparse:
-            num_cols = data_row.shape[1]
-            data = sp.sparse.csr_matrix((num_samples, num_cols), dtype=data_row.dtype)
-        else:
-            num_cols = data_row.shape[0]
-            data = np.zeros((num_samples, num_cols))
-        categorical_features = range(num_cols)
+        num_cols = data_row.shape[1] if is_sparse else data_row.shape[0]
         instance_sample = data_row
+
+        # Initialize data matrix
+        data = self._initialize_data_matrix(is_sparse, num_samples, num_cols, data_row)
+
+        # Set scaling factors
+        scale, mean = self._get_scale_and_mean(data_row, num_cols, is_sparse)
+
+        # Apply perturbation strategy (Gaussian, LHS, etc.)
+        data = self._apply_perturbation(sampling_method, num_cols, num_samples, data, scale, mean,
+                                                 instance_sample)
+
+        # Handle sparse data after perturbation
+        if is_sparse:
+            data = self._handle_sparse_data(data_row, num_cols, data, num_samples)
+
+        # Handle categorical features
+        data, inverse = self._process_categorical_features(data, data_row, num_samples)
+
+        return data, inverse
+
+    def _initialize_data_matrix(self, is_sparse, num_samples, num_cols, data_row):
+        """Initialize the data matrix, either sparse or dense."""
+        if is_sparse:
+            return sp.sparse.csr_matrix((num_samples, num_cols), dtype=data_row.dtype)
+        else:
+            return np.zeros((num_samples, num_cols))
+
+    def _get_scale_and_mean(self, data_row, num_cols, is_sparse):
+        """Retrieve scaling and mean values, adjusted for sparse data if needed."""
         scale = self.scaler.scale_
         mean = self.scaler.mean_
         if is_sparse:
-            # Perturb only the non-zero values
             non_zero_indexes = data_row.nonzero()[1]
-            num_cols = len(non_zero_indexes)
-            instance_sample = data_row[:, non_zero_indexes]
             scale = scale[non_zero_indexes]
             mean = mean[non_zero_indexes]
+        return scale, mean
 
+    def _apply_perturbation(self, sampling_method, num_cols, num_samples, data, scale, mean, instance_sample):
+        """Applies the chosen perturbation strategy (Gaussian, LHS, etc.)."""
         if sampling_method == 'gaussian':
-            data = self.random_state.normal(0, 1, num_samples * num_cols
-                                            ).reshape(num_samples, num_cols)
-            data = np.array(data)
+            data = self.random_state.normal(0, 1, num_samples * num_cols).reshape(num_samples, num_cols)
         elif sampling_method == 'lhs':
-            data = lhs(num_cols, samples=num_samples
-                       ).reshape(num_samples, num_cols)
-            means = np.zeros(num_cols)
-            stdvs = np.array([1]*num_cols)
+            data = lhs(num_cols, samples=num_samples).reshape(num_samples, num_cols)
+            # Apply standard normal distribution to LHS
             for i in range(num_cols):
-                data[:, i] = norm(loc=means[i], scale=stdvs[i]).ppf(data[:, i])
-            data = np.array(data)
+                data[:, i] = norm(loc=0, scale=1).ppf(data[:, i])
         else:
-            warnings.warn('''Invalid input for sampling_method.
-                             Defaulting to Gaussian sampling.''', UserWarning)
-            data = self.random_state.normal(0, 1, num_samples * num_cols
-                                            ).reshape(num_samples, num_cols)
-            data = np.array(data)
+            warnings.warn('Invalid sampling method. Defaulting to Gaussian sampling.', UserWarning)
+            data = self.random_state.normal(0, 1, num_samples * num_cols).reshape(num_samples, num_cols)
 
+        # Apply scaling and centering around the instance or mean
         if self.sample_around_instance:
-            data = data * scale + instance_sample
+            return data * scale + instance_sample
+        return data * scale + mean
+
+    def _handle_sparse_data(self, data_row, num_cols, data, num_samples):
+        """Handles sparse data post-perturbation."""
+        non_zero_indexes = data_row.nonzero()[1]
+        if num_cols == 0:
+            return sp.sparse.csr_matrix((num_samples, data_row.shape[1]), dtype=data_row.dtype)
         else:
-            data = data * scale + mean
-        if is_sparse:
-            if num_cols == 0:
-                data = sp.sparse.csr_matrix((num_samples,
-                                             data_row.shape[1]),
-                                            dtype=data_row.dtype)
-            else:
-                indexes = np.tile(non_zero_indexes, num_samples)
-                indptr = np.array(
-                    range(0, len(non_zero_indexes) * (num_samples + 1),
-                          len(non_zero_indexes)))
-                data_1d_shape = data.shape[0] * data.shape[1]
-                data_1d = data.reshape(data_1d_shape)
-                data = sp.sparse.csr_matrix(
-                    (data_1d, indexes, indptr),
-                    shape=(num_samples, data_row.shape[1]))
-        categorical_features = self.categorical_features
-        first_row = data_row
-        data[0] = data_row.copy()
+            indexes = np.tile(non_zero_indexes, num_samples)
+            indptr = np.arange(0, len(non_zero_indexes) * (num_samples + 1), len(non_zero_indexes))
+            data_1d = data.reshape(-1)
+            return sp.sparse.csr_matrix((data_1d, indexes, indptr), shape=(num_samples, data_row.shape[1]))
+
+    def _process_categorical_features(self, data, data_row, num_samples):
+        """Processes categorical features by applying perturbations and returns the binary (data) and original (inverse) representations."""
         inverse = data.copy()
-        for column in categorical_features:
+        for column in self.categorical_features:
             values = self.feature_values[column]
             freqs = self.feature_frequencies[column]
-            inverse_column = self.random_state.choice(values, size=num_samples,
-                                                      replace=True, p=freqs)
-            binary_column = (inverse_column == first_row[column]).astype(int)
-            binary_column[0] = 1
+            inverse_column = self.random_state.choice(values, size=num_samples, replace=True, p=freqs)
+            binary_column = (inverse_column == data_row[column]).astype(int)
+            binary_column[0] = 1  # Ensure first row (original instance) is the same
             inverse_column[0] = data[0, column]
-            data[:, column] = binary_column
-            inverse[:, column] = inverse_column
-        inverse[0] = data_row
+            data[:, column] = binary_column  # Binary encoded in data
+            inverse[:, column] = inverse_column  # Original categorical values in inverse
+
+        data[0] = data_row.copy()  # Ensure first row is the original data row
+        inverse[0] = data_row  # Ensure first row is the original data row
+
         return data, inverse
