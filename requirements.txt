@@ -1,0 +1,3 @@
+scikit-learn
+pyDOE2
+matplotlib
