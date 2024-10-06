@@ -16,6 +16,7 @@ from scipy.stats.distributions import norm
 
 from . import explanation
 from .lime_base import LimeBase
+from perturbations import alpha_stable, beta, gama, pareto, weibull
 
 
 class TableDomainMapper(explanation.DomainMapper):
@@ -77,7 +78,8 @@ class LimeTabularExplainer(object):
                  class_names=None,
                  feature_selection='auto',
                  sample_around_instance=False,
-                 random_state=None):
+                 random_state=None,
+                 sampling_func=None):
         """Init function.
 
         Args:
@@ -111,7 +113,10 @@ class LimeTabularExplainer(object):
             random_state: an integer or numpy.RandomState that will be used to
                 generate random numbers. If None, the random state will be
                 initialized using the internal numpy seed.
+            sampling_func: custom sampling function (alpha-stable, beta, gamma, pareto, weibull)
+                If defined, used over sampling method
         """
+        self.sampling_func = None
         self.random_state = check_random_state(random_state)
         self.mode = mode
         self.categorical_names = categorical_names or {}
@@ -144,6 +149,7 @@ class LimeTabularExplainer(object):
         self.scaler.fit(training_data)
         self.feature_values = {}
         self.feature_frequencies = {}
+        self.set_sampling_func(sampling_func)
 
         for feature in self.categorical_features:
             column = training_data[:, feature]
@@ -156,6 +162,20 @@ class LimeTabularExplainer(object):
                                                  float(sum(frequencies)))
             self.scaler.mean_[feature] = 0
             self.scaler.scale_[feature] = 1
+
+    def set_sampling_func(self, sampling_func_name, *args, **kwargs):
+        if sampling_func_name == 'alpha':
+            self.sampling_func = partial(alpha_stable.generate_alpha_stable_points, *args, **kwargs)
+        if sampling_func_name == 'beta':
+            self.sampling_func = partial(beta.generate_beta_distribution, *args, **kwargs)
+        if sampling_func_name == 'gamma':
+            self.sampling_func = partial(gama.generate_gamma_distribution, *args, **kwargs)
+        if sampling_func_name == 'pareto':
+            self.sampling_func = partial(pareto.generate_pareto_distribution, *args, **kwargs)
+        if sampling_func_name == 'weibull':
+            self.sampling_func = partial(weibull.generate_weibull_distribution, *args, **kwargs)
+        else:
+            self.sampling_func = None
 
     @staticmethod
     def convert_and_round(values):
@@ -372,7 +392,9 @@ class LimeTabularExplainer(object):
 
     def _apply_perturbation(self, sampling_method, num_cols, num_samples, data, scale, mean, instance_sample):
         """Applies the chosen perturbation strategy (Gaussian, LHS, etc.)."""
-        if sampling_method == 'gaussian':
+        if self.sampling_func:
+            data = self.sampling_func(number_of_points=(num_samples * num_cols), skip_hist=True).reshape(num_samples, num_cols)
+        elif sampling_method == 'gaussian':
             data = self.random_state.normal(0, 1, num_samples * num_cols).reshape(num_samples, num_cols)
         elif sampling_method == 'lhs':
             data = lhs(num_cols, samples=num_samples).reshape(num_samples, num_cols)

@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 from scipy.stats import gamma
 
 # Function to generate Gamma distribution points using scipy
-def generate_gamma_distribution(shape_param, scale=1, number_of_points=1, skip_hist=True):
+def generate_gamma_distribution(shape_param=7.0, scale=1.0, number_of_points=1, skip_hist=True):
     """
     Generate random points from a Gamma distribution using scipy.
 
@@ -47,11 +47,11 @@ def plot_hist(shape_param, scale, points):
     plt.legend()
     plt.show()
 
+def test():
+    # Parameters for Gamma distribution
+    shape_param = 7.0  # Shape parameter k (also called "alpha")
+    scale = 2.0        # Scale parameter theta (default is 1)
+    size = 10000       # Number of points to generate
 
-# Parameters for Gamma distribution
-shape_param = 7.0  # Shape parameter k (also called "alpha")
-scale = 2.0        # Scale parameter theta (default is 1)
-size = 10000       # Number of points to generate
-
-# Generate points
-points = generate_gamma_distribution(shape_param, scale, size, skip_hist=False)
+    # Generate points
+    points = generate_gamma_distribution(number_of_points=2, skip_hist=False)
