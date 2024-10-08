@@ -3,3 +3,5 @@ pyDOE2
 matplotlib
 scipy
 numpy
+pandas
+joblib
