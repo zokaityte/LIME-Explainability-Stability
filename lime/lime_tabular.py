@@ -78,8 +78,7 @@ class LimeTabularExplainer(object):
                  class_names=None,
                  feature_selection='auto',
                  sample_around_instance=False,
-                 random_state=None,
-                 sampling_func=None):
+                 random_state=None):
         """Init function.
 
         Args:
@@ -113,9 +112,8 @@ class LimeTabularExplainer(object):
             random_state: an integer or numpy.RandomState that will be used to
                 generate random numbers. If None, the random state will be
                 initialized using the internal numpy seed.
-            sampling_func: custom sampling function (alpha-stable, beta, gamma, pareto, weibull)
-                If defined, used over sampling method
         """
+        self.sampling_method = None
         self.sampling_func = None
         self.random_state = check_random_state(random_state)
         self.mode = mode
@@ -149,7 +147,6 @@ class LimeTabularExplainer(object):
         self.scaler.fit(training_data)
         self.feature_values = {}
         self.feature_frequencies = {}
-        self.set_sampling_func(sampling_func)
 
         for feature in self.categorical_features:
             column = training_data[:, feature]
@@ -164,18 +161,34 @@ class LimeTabularExplainer(object):
             self.scaler.scale_[feature] = 1
 
     def set_sampling_func(self, sampling_func_name, *args, **kwargs):
+        """
+            sampling_func: custom sampling function (alpha, beta, gamma, pareto, weibull)
+                 If defined, used over sampling method
+            sampling_method: sampling method name (gaussian, lhs, alpha, beta, gamma, pareto, weibull)
+                gaussian, lhs - default LIME perturbation methods
+                alpha, beta, gamma, pareto, weibull - custom implementations
+
+        Args:
+            sampling_func_name: any of (gaussian, lhs, alpha, beta, gamma, pareto, weibull). ^Check sampling_method
+            *args: additional positional arguments for custom perturbation methods
+            **kwargs: additional keyword arguments for custom perturbation methods
+
+        NOTE: default LIME perturbation methods (gaussian, lhs will not be modified by any of the passed arguments)
+        """
+        self.sampling_method = sampling_func_name
         if sampling_func_name == 'alpha':
             self.sampling_func = partial(alpha_stable.generate_alpha_stable_points, *args, **kwargs)
-        if sampling_func_name == 'beta':
+        elif sampling_func_name == 'beta':
             self.sampling_func = partial(beta.generate_beta_distribution, *args, **kwargs)
-        if sampling_func_name == 'gamma':
+        elif sampling_func_name == 'gamma':
             self.sampling_func = partial(gama.generate_gamma_distribution, *args, **kwargs)
-        if sampling_func_name == 'pareto':
+        elif sampling_func_name == 'pareto':
             self.sampling_func = partial(pareto.generate_pareto_distribution, *args, **kwargs)
-        if sampling_func_name == 'weibull':
+        elif sampling_func_name == 'weibull':
             self.sampling_func = partial(weibull.generate_weibull_distribution, *args, **kwargs)
         else:
             self.sampling_func = None
+
 
     @staticmethod
     def convert_and_round(values):
@@ -189,8 +202,7 @@ class LimeTabularExplainer(object):
                          num_features=10,
                          num_samples=5000,
                          distance_metric='euclidean',
-                         model_regressor=None,
-                         sampling_method='gaussian'):
+                         model_regressor=None):
         """Generates explanations for a prediction.
 
         First, we generate neighborhood data by randomly perturbing features
@@ -228,7 +240,7 @@ class LimeTabularExplainer(object):
         if sp.sparse.issparse(data_row) and not sp.sparse.isspmatrix_csr(data_row):
             # Preventative code: if sparse, convert to csr format if not in csr format already
             data_row = data_row.tocsr()
-        data, inverse = self._generate_neighborhood_data_inverse(data_row, num_samples, sampling_method)
+        data, inverse = self._generate_neighborhood_data_inverse(data_row, num_samples)
         if sp.sparse.issparse(data):
             # Note in sparse case we don't subtract mean since data would become dense
             scaled_data = data.multiply(self.scaler.scale_)
@@ -345,8 +357,7 @@ class LimeTabularExplainer(object):
 
     def _generate_neighborhood_data_inverse(self,
                                              data_row,
-                                             num_samples,
-                                             sampling_method):
+                                             num_samples):
         """Generates a neighborhood around a prediction with numerical and categorical features perturbed."""
 
         # Check if the data is sparse and separate handling
@@ -361,7 +372,7 @@ class LimeTabularExplainer(object):
         scale, mean = self._get_scale_and_mean(data_row, num_cols, is_sparse)
 
         # Apply perturbation strategy (Gaussian, LHS, etc.)
-        data = self._apply_perturbation(sampling_method, num_cols, num_samples, data, scale, mean,
+        data = self._apply_perturbation(num_cols, num_samples, data, scale, mean,
                                                  instance_sample)
 
         # Handle sparse data after perturbation
@@ -390,13 +401,14 @@ class LimeTabularExplainer(object):
             mean = mean[non_zero_indexes]
         return scale, mean
 
-    def _apply_perturbation(self, sampling_method, num_cols, num_samples, data, scale, mean, instance_sample):
+    def _apply_perturbation(self, num_cols, num_samples, data, scale, mean, instance_sample):
         """Applies the chosen perturbation strategy (Gaussian, LHS, etc.)."""
+        print(f'generating {self.sampling_method} perturbations')
         if self.sampling_func:
             data = self.sampling_func(number_of_points=(num_samples * num_cols), skip_hist=True).reshape(num_samples, num_cols)
-        elif sampling_method == 'gaussian':
+        elif self.sampling_method == 'gaussian':
             data = self.random_state.normal(0, 1, num_samples * num_cols).reshape(num_samples, num_cols)
-        elif sampling_method == 'lhs':
+        elif self.sampling_method == 'lhs':
             data = lhs(num_cols, samples=num_samples).reshape(num_samples, num_cols)
             # Apply standard normal distribution to LHS
             for i in range(num_cols):
