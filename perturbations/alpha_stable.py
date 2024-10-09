@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 from scipy.stats import levy, levy_l, levy_stable, cauchy
 
 
-def generate_alpha_stable_points(alpha, beta, location=0, scale=1, number_of_points=1, skip_hist=True):
+def generate_alpha_stable_points(alpha=0.5, beta=1, location=0, scale=1, number_of_points=1, skip_hist=True):
     """
     Generate random points from levy distribution.
     stability alpha = 1/2
@@ -52,9 +52,10 @@ def plot_hist(alpha, beta, points):
     plt.legend()
     plt.show()
 
-alpha = 1.5  # Stability parameter (e.g., 0.5 for Levy distribution)
-beta = 0.0   # Symmetry (0 for symmetric distribution)
-size = 100  # Number of points to generate
+def test():
+    alpha = 1.5  # Stability parameter (e.g., 0.5 for Levy distribution)
+    beta = 0.0   # Symmetry (0 for symmetric distribution)
+    size = 100  # Number of points to generate
 
-# Generate points
-points = generate_alpha_stable_points(alpha, beta,0, 1, size, False)
+    # Generate points
+    points = generate_alpha_stable_points(alpha, beta,0, 1, size, False)

@@ -4,7 +4,7 @@ from scipy.stats import beta
 
 
 # Function to generate Beta distribution points using scipy
-def generate_beta_distribution(alpha, beta_param, number_of_points=1, location=0, scale=1, skip_hist=True):
+def generate_beta_distribution(alpha=0.7, beta_param=0.5, number_of_points=1, location=0, scale=1, skip_hist=True):
     """
     Generate random points from a Beta distribution using scipy.
 
@@ -51,11 +51,11 @@ def plot_hist(alpha, beta_param, points):
     plt.legend()
     plt.show()
 
+def test():
+    # Parameters for Beta distribution
+    alpha = 0.7  # Shape parameter alpha (controls the distribution skew)
+    beta_param = 0.5  # Shape parameter beta (controls the distribution skew)
+    size = 1000  # Number of points to generate
 
-# Parameters for Beta distribution
-alpha = 0.7  # Shape parameter alpha (controls the distribution skew)
-beta_param = 0.5  # Shape parameter beta (controls the distribution skew)
-size = 1000  # Number of points to generate
-
-# Generate points
-points = generate_beta_distribution(alpha, beta_param, size, skip_hist=False)
+    # Generate points
+    points = generate_beta_distribution(alpha, beta_param, size, skip_hist=False)

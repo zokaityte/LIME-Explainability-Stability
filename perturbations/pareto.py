@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 from scipy.stats import pareto
 
 # Function to generate Pareto distribution points using scipy
-def generate_pareto_distribution(shape_param, scale=1, number_of_points=1, skip_hist=True):
+def generate_pareto_distribution(shape_param=2.5, scale=1, number_of_points=1, skip_hist=True):
     """
     Generate random points from a Pareto distribution using scipy.
 
@@ -48,11 +48,11 @@ def plot_hist(shape_param, scale, points):
     plt.legend()
     plt.show()
 
+def test():
+    # Parameters for Pareto distribution
+    shape_param = 2.5  # Shape parameter (also called "alpha" or "a")
+    scale = 1.0        # Scale parameter (default is 1)
+    size = 10000       # Number of points to generate
 
-# Parameters for Pareto distribution
-shape_param = 2.5  # Shape parameter (also called "alpha" or "a")
-scale = 1.0        # Scale parameter (default is 1)
-size = 10000       # Number of points to generate
-
-# Generate points
-points = generate_pareto_distribution(shape_param, scale, size, skip_hist=False)
+    # Generate points
+    points = generate_pareto_distribution(shape_param, scale, size, skip_hist=False)
