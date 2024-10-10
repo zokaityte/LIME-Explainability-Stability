@@ -16,6 +16,7 @@ from scipy.stats.distributions import norm
 
 from . import explanation
 from .lime_base import LimeBase
+from perturbations import alpha_stable, beta, gama, pareto, weibull
 
 
 class TableDomainMapper(explanation.DomainMapper):
@@ -112,6 +113,8 @@ class LimeTabularExplainer(object):
                 generate random numbers. If None, the random state will be
                 initialized using the internal numpy seed.
         """
+        self.sampling_method = None
+        self.sampling_func = None
         self.random_state = check_random_state(random_state)
         self.mode = mode
         self.categorical_names = categorical_names or {}
@@ -157,6 +160,36 @@ class LimeTabularExplainer(object):
             self.scaler.mean_[feature] = 0
             self.scaler.scale_[feature] = 1
 
+    def set_sampling_func(self, sampling_func_name, *args, **kwargs):
+        """
+            sampling_func: custom sampling function (alpha, beta, gamma, pareto, weibull)
+                 If defined, used over sampling method
+            sampling_method: sampling method name (gaussian, lhs, alpha, beta, gamma, pareto, weibull)
+                gaussian, lhs - default LIME perturbation methods
+                alpha, beta, gamma, pareto, weibull - custom implementations
+
+        Args:
+            sampling_func_name: any of (gaussian, lhs, alpha, beta, gamma, pareto, weibull). ^Check sampling_method
+            *args: additional positional arguments for custom perturbation methods
+            **kwargs: additional keyword arguments for custom perturbation methods
+
+        NOTE: default LIME perturbation methods (gaussian, lhs will not be modified by any of the passed arguments)
+        """
+        self.sampling_method = sampling_func_name
+        if sampling_func_name == 'alpha':
+            self.sampling_func = partial(alpha_stable.generate_alpha_stable_points, *args, **kwargs)
+        elif sampling_func_name == 'beta':
+            self.sampling_func = partial(beta.generate_beta_distribution, *args, **kwargs)
+        elif sampling_func_name == 'gamma':
+            self.sampling_func = partial(gama.generate_gamma_distribution, *args, **kwargs)
+        elif sampling_func_name == 'pareto':
+            self.sampling_func = partial(pareto.generate_pareto_distribution, *args, **kwargs)
+        elif sampling_func_name == 'weibull':
+            self.sampling_func = partial(weibull.generate_weibull_distribution, *args, **kwargs)
+        else:
+            self.sampling_func = None
+
+
     @staticmethod
     def convert_and_round(values):
         return ['%.2f' % v for v in values]
@@ -169,8 +202,7 @@ class LimeTabularExplainer(object):
                          num_features=10,
                          num_samples=5000,
                          distance_metric='euclidean',
-                         model_regressor=None,
-                         sampling_method='gaussian'):
+                         model_regressor=None):
         """Generates explanations for a prediction.
 
         First, we generate neighborhood data by randomly perturbing features
@@ -205,63 +237,50 @@ class LimeTabularExplainer(object):
             An Explanation object (see explanation.py) with the corresponding
             explanations.
         """
-
-        # Step 1: Handle sparse data format
-        # If data_row is sparse but not in csr format, convert it to csr format for easier processing.
         if sp.sparse.issparse(data_row) and not sp.sparse.isspmatrix_csr(data_row):
+            # Preventative code: if sparse, convert to csr format if not in csr format already
             data_row = data_row.tocsr()
-
-        # Step 2: Generate neighborhood data by perturbing features
-        # Generates perturbed data points around the instance being explained and their corresponding original values.
-        data, inverse = self._generate_neighborhood_data_inverse(data_row, num_samples, sampling_method)
-
-        # Step 3: Scale the perturbed data
-        # If the data is sparse, multiply by the scaling factor, otherwise subtract the mean and divide by the standard deviation.
+        data, inverse = self._generate_neighborhood_data_inverse(data_row, num_samples)
         if sp.sparse.issparse(data):
+            # Note in sparse case we don't subtract mean since data would become dense
             scaled_data = data.multiply(self.scaler.scale_)
+            # Multiplying with csr matrix can return a coo sparse matrix
             if not sp.sparse.isspmatrix_csr(scaled_data):
                 scaled_data = scaled_data.tocsr()
         else:
             scaled_data = (data - self.scaler.mean_) / self.scaler.scale_
-
-        # Step 4: Compute pairwise distances between the perturbed data and the original instance
-        # The distance metric (e.g., Euclidean) is used to calculate the similarity between each perturbed sample and the original instance.
         distances = sklearn.metrics.pairwise_distances(
-            scaled_data,
-            scaled_data[0].reshape(1, -1),
-            metric=distance_metric
+                scaled_data,
+                scaled_data[0].reshape(1, -1),
+                metric=distance_metric
         ).ravel()
 
-        # Step 5: Predict with the original model
-        # Use the original model to predict on the inverse (perturbed) data.
         yss = predict_fn(inverse)
 
-        # Step 6: Handle classification case
+        # for classification, the model needs to provide a list of tuples - classes
+        # along with prediction probabilities
         if self.mode == "classification":
-            # If the model does not output probabilities, raise an error.
             if len(yss.shape) == 1:
                 raise NotImplementedError("LIME does not currently support "
                                           "classifier models without probability "
                                           "scores.")
             elif len(yss.shape) == 2:
-                # If class names are not provided, assign default names '0', '1', '2', ...
                 if self.class_names is None:
                     self.class_names = [str(x) for x in range(yss[0].shape[0])]
                 else:
                     self.class_names = list(self.class_names)
-                # If the prediction probabilities do not sum to 1, raise a warning.
                 if not np.allclose(yss.sum(axis=1), 1.0):
                     warnings.warn("""
-                    Prediction probabilities do not sum to 1, and
-                    thus do not constitute a valid probability space.
-                    Check that your classifier outputs probabilities
+                    Prediction probabilties do not sum to 1, and
+                    thus does not constitute a probability space.
+                    Check that you classifier outputs probabilities
                     (Not log probabilities, or actual class predictions).
                     """)
             else:
-                raise ValueError("Your model outputs arrays with {} dimensions".format(len(yss.shape)))
+                raise ValueError("Your model outputs "
+                                 "arrays with {} dimensions".format(len(yss.shape)))
 
-        # Step 7: Handle regression case
-        # In the regression case, check that the predictions are in the expected format (1D array).
+        # for regression, the output should be a one-dimensional array of predictions
         else:
             try:
                 if len(yss.shape) != 1 and len(yss[0].shape) == 1:
@@ -271,20 +290,17 @@ class LimeTabularExplainer(object):
                 raise ValueError("Your model needs to output single-dimensional \
                     numpyarrays, not arrays of {} dimensions".format(yss.shape))
 
-            # Set predicted value, min, and max values
             predicted_value = yss[0]
             min_y = min(yss)
             max_y = max(yss)
 
-            # Add a dimension to be compatible with downstream processes
+            # add a dimension to be compatible with downstream machinery
             yss = yss[:, np.newaxis]
 
-        # Step 8: Prepare feature names and values
         feature_names = copy.deepcopy(self.feature_names)
         if feature_names is None:
             feature_names = [str(x) for x in range(data_row.shape[0])]
 
-        # If the data is sparse, retrieve the non-zero values for explanation
         if sp.sparse.issparse(data_row):
             values = self.convert_and_round(data_row.data)
             feature_indexes = data_row.indices
@@ -292,7 +308,6 @@ class LimeTabularExplainer(object):
             values = self.convert_and_round(data_row)
             feature_indexes = None
 
-        # Update feature names for categorical features
         for i in self.categorical_features:
             name = int(data_row[i])
             if i in self.categorical_names:
@@ -301,20 +316,14 @@ class LimeTabularExplainer(object):
             values[i] = 'True'
         categorical_features = self.categorical_features
 
-        # Step 9: Create domain mapper
-        # The domain mapper converts feature indices to feature names for explanation.
         domain_mapper = TableDomainMapper(feature_names,
                                           values,
                                           scaled_data[0],
                                           categorical_features=categorical_features,
                                           feature_indexes=feature_indexes)
-
-        # Step 10: Initialize explanation object
         ret_exp = explanation.Explanation(domain_mapper,
                                           mode=self.mode,
                                           class_names=self.class_names)
-
-        # Step 11: Set probabilities for classification tasks
         if self.mode == "classification":
             ret_exp.predict_proba = yss[0]
             if top_labels:
@@ -322,40 +331,33 @@ class LimeTabularExplainer(object):
                 ret_exp.top_labels = list(labels)
                 ret_exp.top_labels.reverse()
         else:
-            # For regression, set predicted, min, and max values
             ret_exp.predicted_value = predicted_value
             ret_exp.min_value = min_y
             ret_exp.max_value = max_y
             labels = [0]
-
-        # Step 12: Fit surrogate model and generate explanations for each label
-        # Fit a local linear model (surrogate) to the neighborhood data and return the explanations.
         for label in labels:
             (ret_exp.intercept[label],
              ret_exp.local_exp[label],
              ret_exp.score[label],
              ret_exp.local_pred[label]) = self.base.explain_instance_with_data(
-                scaled_data,
-                yss,
-                distances,
-                label,
-                num_features,
-                model_regressor=model_regressor,
-                feature_selection=self.feature_selection)
+                    scaled_data,
+                    yss,
+                    distances,
+                    label,
+                    num_features,
+                    model_regressor=model_regressor,
+                    feature_selection=self.feature_selection)
 
-        # Step 13: Handle the regression case if needed
         if self.mode == "regression":
             ret_exp.intercept[1] = ret_exp.intercept[0]
             ret_exp.local_exp[1] = [x for x in ret_exp.local_exp[0]]
             ret_exp.local_exp[0] = [(i, -1 * j) for i, j in ret_exp.local_exp[1]]
 
-        # Return the explanation object
         return ret_exp
 
     def _generate_neighborhood_data_inverse(self,
                                              data_row,
-                                             num_samples,
-                                             sampling_method):
+                                             num_samples):
         """Generates a neighborhood around a prediction with numerical and categorical features perturbed."""
 
         # Check if the data is sparse and separate handling
@@ -370,7 +372,7 @@ class LimeTabularExplainer(object):
         scale, mean = self._get_scale_and_mean(data_row, num_cols, is_sparse)
 
         # Apply perturbation strategy (Gaussian, LHS, etc.)
-        data = self._apply_perturbation(sampling_method, num_cols, num_samples, data, scale, mean,
+        data = self._apply_perturbation(num_cols, num_samples, data, scale, mean,
                                                  instance_sample)
 
         # Handle sparse data after perturbation
@@ -399,11 +401,14 @@ class LimeTabularExplainer(object):
             mean = mean[non_zero_indexes]
         return scale, mean
 
-    def _apply_perturbation(self, sampling_method, num_cols, num_samples, data, scale, mean, instance_sample):
+    def _apply_perturbation(self, num_cols, num_samples, data, scale, mean, instance_sample):
         """Applies the chosen perturbation strategy (Gaussian, LHS, etc.)."""
-        if sampling_method == 'gaussian':
+        print(f'generating {self.sampling_method} perturbations')
+        if self.sampling_func:
+            data = self.sampling_func(number_of_points=(num_samples * num_cols), skip_hist=True).reshape(num_samples, num_cols)
+        elif self.sampling_method == 'gaussian':
             data = self.random_state.normal(0, 1, num_samples * num_cols).reshape(num_samples, num_cols)
-        elif sampling_method == 'lhs':
+        elif self.sampling_method == 'lhs':
             data = lhs(num_cols, samples=num_samples).reshape(num_samples, num_cols)
             # Apply standard normal distribution to LHS
             for i in range(num_cols):
