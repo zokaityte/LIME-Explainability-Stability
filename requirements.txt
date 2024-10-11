@@ -3,5 +3,11 @@ pyDOE2
 matplotlib
 scipy
 numpy
+sys
+os
+gc
 pandas
-joblib
+plotly
+openpyxl
+seaborn
+sklearn
