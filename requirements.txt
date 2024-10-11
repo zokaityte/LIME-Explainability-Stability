@@ -3,8 +3,6 @@ pyDOE2
 matplotlib
 scipy
 numpy
-sys
-os
 gc
 pandas
 plotly
