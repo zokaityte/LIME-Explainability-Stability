@@ -403,7 +403,6 @@ class LimeTabularExplainer(object):
 
     def _apply_perturbation(self, num_cols, num_samples, data, scale, mean, instance_sample):
         """Applies the chosen perturbation strategy (Gaussian, LHS, etc.)."""
-        print(f'generating {self.sampling_method} perturbations')
         if self.sampling_func:
             data = self.sampling_func(number_of_points=(num_samples * num_cols), skip_hist=True).reshape(num_samples, num_cols)
         elif self.sampling_method == 'gaussian':
