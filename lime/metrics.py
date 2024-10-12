@@ -4,9 +4,8 @@ def _jaccard_similarity(list1, list2):
     s2 = set(list2)
     return len(s1.intersection(s2)) / len(s1.union(s2))
 
-#Computes the dissimilarity of items
+#Computes the similarity of items
 def jaccard_similarities(list_of_lists_of_features):
-# TODO This is based on DLIME, check if makes sense (comparing explanation with itself and using mean)
     sim = []
     for l in list_of_lists_of_features:
         i_sim = []
