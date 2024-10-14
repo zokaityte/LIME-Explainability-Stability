@@ -1,8 +1,8 @@
-scikit-learn
+scikit-learn==1.5.1
 pyDOE2
 matplotlib
 scipy
-numpy
+numpy==1.26.4
 pandas
 plotly
 openpyxl
