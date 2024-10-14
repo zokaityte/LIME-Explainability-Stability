@@ -10,6 +10,8 @@ from scipy.stats import norm
 import matplotlib.pyplot as plt
 import seaborn as sns
 import openpyxl
+import plotly.graph_objects as go
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 # Include path for generics
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../common')))
@@ -20,16 +22,16 @@ from generic import pemji
 
 
 def __spearman_corr_fast(x, y):
+    if np.isnan(x).any() or np.isnan(y).any():
+        # Mask NaNs before ranking
+        mask = ~np.isnan(x) & ~np.isnan(y)
+        x, y = x[mask], y[mask]
+
     # Rank the data, handling NaNs by omitting them
-    ranked_x = rankdata(x, method='average', nan_policy='omit')
-    ranked_y = rankdata(y, method='average', nan_policy='omit')
-    
-    # Remove NaNs
-    mask = ~np.isnan(ranked_x) & ~np.isnan(ranked_y)
-    ranked_x, ranked_y = ranked_x[mask], ranked_y[mask]
-    
+    ranked_x = rankdata(x, method='average')
+    ranked_y = rankdata(y, method='average')
+
     n = len(ranked_x)
-    
     if n == 0:
         return np.nan, np.nan  # return NaN if no valid data
     
@@ -52,7 +54,7 @@ def __spearman_corr_fast(x, y):
 
 def fast_spearman(data):
     """
-    Fast calculation of spearman correlation coefficient with p values
+    Fast calculation of spearman correlation coefficient with p values using parallel processing.
 
     Parameters:
     data (dataframe): input df data
@@ -61,16 +63,45 @@ def fast_spearman(data):
     corr_df (dataframe): spearman correlation coefficients of data
     p_values_df (dataframe): p values of spearman correlations
     """
+
+    cpu_count = int(os.cpu_count() * 0.8)
+    printc(f"{pemji('rocket')} Calculating spearman now! CPU cnt will use: {cpu_count}", 'b')
     n_cols = data.shape[1]
     corr_matrix = np.zeros((n_cols, n_cols))
     p_matrix = np.zeros((n_cols, n_cols))
+    completed_tasks = 0
+    total_tasks = (n_cols * (n_cols + 1)) // 2
 
-    for i in range(n_cols):
-        for j in range(i, n_cols):
-            corr, p_val = __spearman_corr_fast(data.iloc[:, i], data.iloc[:, j])
-            corr_matrix[i, j] = corr_matrix[j, i] = corr
-            p_matrix[i, j] = p_matrix[j, i] = p_val
-    
+    # Worker function to compute the Spearman correlation and p-value for a given pair of columns
+    def worker(i, j):
+        corr, p_val = __spearman_corr_fast(data.iloc[:, i], data.iloc[:, j])
+        return i, j, corr, p_val
+
+    # List to store the future objects
+    results = []
+
+    # Parallelize with ThreadPoolExecutor
+    with ThreadPoolExecutor(max_workers=cpu_count) as executor:
+        future_to_indices = {
+            executor.submit(worker, i, j): (i, j) for i in range(n_cols) for j in range(i, n_cols)
+        }
+
+        # Collect the results as the tasks complete
+        for future in as_completed(future_to_indices):
+            i, j = future_to_indices[future]
+            completed_tasks += 1
+            col_i_name = data.columns[i]
+            col_j_name = data.columns[j]
+            printc(f"{pemji('lightning')} Completed: {col_i_name} vs {col_j_name} ({completed_tasks}/{total_tasks} tasks done)", 'b')
+            i, j, corr, p_val = future.result()
+            results.append((i, j, corr, p_val))
+
+    # Write the results back to the matrices in the correct order
+    for i, j, corr, p_val in sorted(results, key=lambda x: (x[0], x[1])):
+        corr_matrix[i, j] = corr_matrix[j, i] = corr
+        p_matrix[i, j] = p_matrix[j, i] = p_val
+
+    # Convert the matrices to DataFrames
     corr_df = pd.DataFrame(corr_matrix, index=data.columns, columns=data.columns)
     p_values_df = pd.DataFrame(p_matrix, index=data.columns, columns=data.columns)
 
@@ -97,7 +128,7 @@ class bigdata:
         
         # Do not access directly!
         if load_splits is False:
-            self.__data = pd.read_csv(csv_path)
+            self.__data = pd.read_csv(csv_path, engine="pyarrow") #Faster!
             if self.__data is None:
                 raise ValueError(f"{pemji('red_cross')} CSV data read failure! NULL!")
         
@@ -174,6 +205,95 @@ class bigdata:
         if self.__train_df is None or self.__val_df is None or self.__test_df is None:
             raise ValueError(f"{pemji('red_cross')}{pemji('')} Train/Val/Test is either invalid or not set! Not yet split()?")
         return self.__train_df, self.__val_df, self.__test_df
+    
+    def transform_timestamp(self, timestamp_col: str) -> pd.DataFrame:
+        """
+        Transforms the Timestamp column to show only the hour as an integer.
+
+        Parameters:
+        timestamp_col (str): The name of the timestamp column.
+
+        Returns:
+        Nothing, updates the data inside Class object only!
+        """
+        
+        if self.data_freed == False:
+            df_list = [self.__data]
+        elif self.__train_df and self.__val_df and self.__test_df:
+            df_list = [self.__train_df, self.__val_df, self.__test_df]
+        else:
+            raise ValueError(f"{pemji('red_cross')} No data to timestamp encode in object!")
+
+        for df in df_list:
+            # Convert the column to datetime format
+            df[timestamp_col] = pd.to_datetime(df[timestamp_col], format='%d/%m/%Y %H:%M:%S')
+            
+            # Extract the hour and replace the timestamp column with it
+            df[timestamp_col] = df[timestamp_col].dt.hour
+            
+        printc(f"{pemji('green_check')} Timestamp encoding done on columns: {timestamp_col}", 'g')
+    
+    def one_hot_encode(self, categorical_cols: list) -> pd.DataFrame:
+        """
+        One-hot encodes the specified categorical columns in the dataframe.
+        
+        Parameters:
+        categorical_cols (list): List of categorical column names to be one-hot encoded.
+        
+        Returns:
+        Nothing, updates the data inside Class object only!
+        """
+        
+        if self.data_freed == False:
+            self.__data = pd.get_dummies(self.__data, columns=categorical_cols)
+        elif self.__train_df and self.__val_df and self.__test_df:
+            self.__train_df = pd.get_dummies(self.__train_df, columns=categorical_cols)
+            self.__val_df = pd.get_dummies(self.__val_df, columns=categorical_cols)
+            self.__test_df = pd.get_dummies(self.__test_df, columns=categorical_cols)
+        else:
+            raise ValueError(f"{pemji('red_cross')} No data to one-hot encode in object!")
+        
+        printc(f"{pemji('green_check')} One-hot encoding done on columns: {categorical_cols}", 'g')
+
+
+    def conditional_prob_transform(self, categorical_cols: list, target_col: str, alpha: float = 10):
+        """
+        Applies smoothed conditional probability-based transformation (target encoding) to the specified categorical columns.
+        
+        Parameters:
+        categorical_cols (list): List of categorical column names to be transformed.
+        target_col (str): The name of the target column for conditional probability transformation.
+        alpha (float): Smoothing factor. Higher values of alpha give more weight to the global mean.
+        
+        Returns:
+        Nothing, updates the data inside Class object only!
+        """
+
+        if self.data_freed == False:
+            df_list = [self.__data]
+        elif self.__train_df and self.__val_df and self.__test_df:
+            df_list = [self.__train_df, self.__val_df, self.__test_df]
+        else:
+            raise ValueError(f"{pemji('red_cross')} No data to cond prob encode in object!")
+
+        mean_list = []
+        for df in df_list:
+            mean_list.append(df[target_col].mean())
+
+        for col in categorical_cols:
+            for idx, df in enumerate(df_list):
+                # Calculate category means and sizes
+                category_means = df.groupby(col)[target_col].mean()
+                category_sizes = df.groupby(col).size()
+
+                # Apply smoothing
+                smoothed = (category_sizes * category_means + alpha * mean_list[idx]) / (category_sizes + alpha)
+
+                # Replace categorical values with their corresponding smoothed probabilities
+                df[col] = df[col].map(smoothed)
+
+        printc(f"{pemji('green_check')} Conditional probability transform done on columns: {categorical_cols} vs {target_col}", 'g')
+
 
     def split(self, output_dir="splitted", y_labels=['Label'], free_whole=True, train_split=0.7, val_split=0.2, test_split=0.1, seed=42):
         """
@@ -283,7 +403,8 @@ class bigdata:
 
             # Filter out columns where the count of unique values is just 1
             df_filtered = df.loc[:, df.nunique() > 1]
-            
+            df_filtered = df_filtered.drop(columns=[''], errors='ignore') # drop unnamed cols
+
             self.__data = df_filtered
 
             filtered_columns = df_filtered.columns.tolist()
@@ -323,7 +444,7 @@ class bigdata:
             
             printc(f"{pemji('trashcan')} Dropped columns: {dropped_columns}", 'v')
         
-    def drop_collumns(self, collumns):
+    def drop_collumns(self, columns):
         """
         Remove specified columns from the DataFrame.
 
@@ -441,41 +562,72 @@ class bigdata:
                         continue
                     
                     # Calculate histogram bin counts and edges
-                    counts, bins = np.histogram(filtered_data, bins=max_ticks)
+                    data_ticks_here = data[column].nunique()
+                    if data_ticks_here < max_ticks:
+                        max_ticks_use = data_ticks_here
+                    else:
+                        max_ticks_use = max_ticks
+                        printc(f"Max ticks reduced for '{column}' from {data_ticks_here} to: {max_ticks_use}", 'v')
+                    counts, bins = np.histogram(filtered_data, bins=max_ticks_use)
                     
                     # Cap bin heights if any are above 60% of the maximum height
                     max_height = counts.max()
                     cap_threshold = 0.6 * max_height
                     
-                    # Find the second tallest height of bar to cap at
-                    second_max_height = sorted(counts)[-2] if len(counts) > 1 else 0
+                    # Find the second tallest height and use it to cap the plot's Y size
+                    second_max_height = sorted(counts)[-2] if len(counts) > 1 else max_height
+                    if second_max_height == 0:
+                        second_max_height = max_height # If some bin category where no values after extremes left
+                        printc(f"{pemji('red_exclamation')} Unique count of {column} after filter became 1! (only vals for one category..)", 'y')
                     
-                    capped_counts = counts.copy()
-                    annotations = []
+                    # Set the plot height limit as 110% of the second tallest bar
+                    plot_max_height = 1.1 * second_max_height
                     
                     # Do the capping and add annotations for capped collumn, how many counts of it was there
+                    capped_counts = counts.copy()
+                    annotations = []
+                            
                     for i in range(len(capped_counts)):
                         if capped_counts[i] >= cap_threshold:
-                            # Set the height to the second max height
-                            capped_counts[i] = second_max_height
+                            if capped_counts[i] == max_height:
+                                capped_counts[i] = 1.0 * plot_max_height  # 100% for the tallest bar
+                            else:
+                                capped_counts[i] = 0.9 * plot_max_height  # 90% for the second tallest bar
+                            
                             # Add annotation for original frequency
                             annotations.append(dict(
                                 x=(bins[i] + bins[i + 1]) / 2,  # Position in the middle of the bin
-                                y=second_max_height + 0.05 * max_height,  # Slightly above the bar
-                                text=f'Original of {bins[i]}: {counts[i]}',
+                                y=capped_counts[i] + 0.05 * plot_max_height,  # Slightly above the bar
+                                text=f"{pemji('red_exclamation')} FREQ of {bins[i]}: {counts[i]} {pemji('red_exclamation')}",
                                 showarrow=True,
                                 arrowhead=1,
                                 ax=0,
                                 ay=-40,
                             ))
                     
-                    fig = px.histogram(x=bins[:-1], y=capped_counts, title=f'Distribution of {column} (After Removing 5% Extremes)', labels={'x': column, 'y': 'Frequency'})
+                    # Create the bar chart manually since we're working with counts and bins
+                    fig = go.Figure()
+                    # Add a bar trace using the capped counts and bin midpoints
+                    bin_midpoints = (bins[:-1] + bins[1:]) / 2
+                    fig.add_trace(go.Bar(x=bin_midpoints, y=capped_counts, text=capped_counts, textposition='auto'))
+                    # Update layout with axis titles, ticks, and annotations
                     fig.update_layout(
+                        title={
+                            'text': f'Distribution of {column} (After Removing 5% Extremes)',
+                            'x': 0.5,  # Center the title
+                            'xanchor': 'center',
+                            'yanchor': 'top'
+                        },
                         xaxis_title=column,
                         yaxis_title='Frequency',
-                        xaxis_nticks=max_ticks,
-                        xaxis_tickangle=45,
-                        xaxis_tickformat='.2s',
+                        height=720,
+                        width=1280,
+                        xaxis=dict(
+                            tickvals=bins[:-1],
+                            nticks=max_ticks_use,
+                            tickangle=90, 
+                            tickformat='.2s',
+                        ),
                         annotations=[
                             dict(
                                 xref='paper', yref='paper',
@@ -483,7 +635,7 @@ class bigdata:
                                 text=f"Most extreme values (before filtering):\nLowest: {lowest_value}\nHighest: {highest_value}",
                                 font=dict(size=10)
                             )
-                        ] + annotations  # Add bin annotations
+                        ] + annotations
                     )
                     
                     # Add annotations for each bin
@@ -539,11 +691,11 @@ class bigdata:
                 if numeric_data.shape[1] > 1:  # At least two numeric columns are needed for correlation
                     corr_df, p_values_df = fast_spearman(numeric_data)
                     printc(f"{pemji('check_mark')} Spearman correlations calculated", 'p')
-                    
+
                     # Save descriptive stats and correlation matrices to Excel
                     self.__save_to_excel(writer, descriptive_stats, 'Descriptive_Stats')
-                    self.__save_to_excel(writer, corr_df, 'Spearman_Correlation')
-                    self.__save_to_excel(writer, p_values_df, 'P_Values')
+                    self.__save_to_excel(writer, corr_df.reset_index(), 'Spearman_Correlation')
+                    self.__save_to_excel(writer, p_values_df.reset_index(), 'P_Values')
                     printc(f"{pemji('check_mark')} Descriptives, spearman correlations saved to Excel", 'p')
                 else:
                     raise ValueError(f"{pemji('red_cross')}{pemji('')} Not enough collumns for correlations!?")
@@ -656,7 +808,7 @@ class bigdata:
 
             # Drop the highly correlated columns from the data
             reduced_data = data.drop(columns=drop_columns)
-            data = reduced_data
+            self.__data = reduced_data
             
             # Save the reduced dataset to a new CSV file
             output_csv_path = os.path.join(output_dir, f'final_{out_type}.csv')
