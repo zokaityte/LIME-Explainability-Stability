@@ -6,8 +6,6 @@ import pandas as pd
 class ExperimentData:
 
     def __init__(self, dataset_path: str, label_names: list, categorical_columns_names=None):
-        if categorical_columns_names is None:
-            categorical_columns_names = []
         self.dataset_path = dataset_path
         self.train_data_csv_path = os.path.join(self.dataset_path, "train_data.csv")
         self.val_data_csv_path = os.path.join(self.dataset_path, "val_data.csv")

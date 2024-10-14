@@ -2,13 +2,13 @@ import os
 from datetime import datetime, timezone
 from typing import List, Dict
 
-import coolname
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from numpy.random import RandomState
 
-from experiment_things.models import LimeExperimentConfig, LabelExplanationMetrics
+from common.name_utils import generate_slug_with_seed
+from experiment.models import LimeExperimentConfig, LabelExplanationMetrics
 from lime.explanation import Explanation
 from lime.lime_tabular import LimeTabularExplainer
 from lime.metrics import calculate_stability
@@ -19,15 +19,14 @@ RESULTS_FILE_NAME = "experiment_results.csv"
 
 class LimeExperiment:
 
-    def __init__(self, config: LimeExperimentConfig, save_explanations=True):
+    def __init__(self, config: LimeExperimentConfig):
 
         self._config = config
         self._explanations = None
         self._evaluation_results = None
         self._start_time = None
         self._end_time = None
-        self._experiment_id = coolname.generate_slug(3)
-        self._save_explanations = save_explanations
+        self._experiment_id = generate_slug_with_seed(config.random_seed)
 
     def run(self):
 
@@ -49,8 +48,9 @@ class LimeExperiment:
         self._end_time = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3] + 'Z'
         print(f"Experiment completed at {self._end_time} UTC")
 
-        print("Saving results...")
-        self._save_results()
+        if self._config.save_results:
+            print("Saving results...")
+            self._save_results()
 
     @staticmethod
     def _run_experiment(random_seed, experiment_data, explainer_config, times_to_run, explained_model, mode) -> List[
@@ -157,7 +157,7 @@ class LimeExperiment:
         else:
             print(f"Error: Failed to save results to {results_file_path}")
 
-        if self._save_explanations:
+        if self._config.save_explanations:
             experiment_path = os.path.join(RESULTS_OUTPUT_DIR, self._experiment_id)
             os.makedirs(experiment_path, exist_ok=True)
             for i, explanation in enumerate(self._explanations):

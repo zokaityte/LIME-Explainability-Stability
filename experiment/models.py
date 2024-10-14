@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 
-from experiment_things.explained_model import ExplainedModel
-from experiment_things.experiment_data import ExperimentData
+from experiment.explained_model import ExplainedModel
+from experiment.experiment_data import ExperimentData
 
 
 @dataclass
@@ -24,8 +24,8 @@ class LimeExplainerConfig:
 
     def as_records_dict(self):
         return {
-            "kernel_width": self.kernel_width if self.kernel_width is not None else "default",
-            "kernel": self.kernel if self.kernel is not None else "default",
+            "kernel_width": self.kernel_width if self.kernel_width is not None else "default (sqrt(num_features) * 0.75)",
+            "kernel": self.kernel if self.kernel is not None else "default (exponential)",
             "sample_around_instance": self.sample_around_instance,
             "num_features": self.num_features,
             "num_samples": self.num_samples,
@@ -41,6 +41,8 @@ class LimeExperimentConfig:
     explainer_config: LimeExplainerConfig
     times_to_run: int
     random_seed: int = None
+    save_results: bool = True
+    save_explanations: bool = True
     mode: str = "classification"
 
     def as_records_dict(self):
