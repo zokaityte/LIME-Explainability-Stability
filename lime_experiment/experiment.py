@@ -8,7 +8,7 @@ import pandas as pd
 from numpy.random import RandomState
 
 from common.name_utils import generate_slug_with_seed
-from experiment.models import LimeExperimentConfig, LabelExplanationMetrics
+from lime_experiment.models import LimeExperimentConfig, LabelExplanationMetrics
 from lime.explanation import Explanation
 from lime.lime_tabular import LimeTabularExplainer
 from lime.metrics import calculate_stability
@@ -147,15 +147,31 @@ class LimeExperiment:
         results = self.get_results()
         results_file_path = os.path.join(RESULTS_OUTPUT_DIR, RESULTS_FILE_NAME)
 
-        if os.path.exists(results_file_path):
-            pd.DataFrame([results]).to_csv(results_file_path, mode='a', header=False, index=False)
-        else:
-            pd.DataFrame([results]).to_csv(results_file_path, mode='w', header=True, index=False)
+        # Convert current results to DataFrame
+        results_df = pd.DataFrame([results])
 
+        # Check if the results file already exists
         if os.path.exists(results_file_path):
-            print(f"Results successfully saved to {results_file_path}")
+            # Load the existing file to check for column names
+            existing_df = pd.read_csv(results_file_path, nrows=0)  # Load only the header (column names)
+            existing_columns = existing_df.columns.tolist()
+            new_columns = results_df.columns.tolist()
+
+            if existing_columns == new_columns:
+                # Columns match, append the results
+                results_df.to_csv(results_file_path, mode='a', header=False, index=False)
+                print(f"Results successfully appended to {results_file_path}")
+            else:
+                timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+                new_file_path = os.path.join(RESULTS_OUTPUT_DIR, f"experiment_results_{timestamp}.csv")
+                results_df.to_csv(new_file_path, mode='w', header=True, index=False)
+                print(f"Column mismatch! Results saved to new file: {new_file_path}")
         else:
-            print(f"Error: Failed to save results to {results_file_path}")
+            results_df.to_csv(results_file_path, mode='w', header=True, index=False)
+            print(f"Results file created and saved to {results_file_path}")
+
+        print("Results: ")
+        print(results_df.to_string(index=False))
 
         if self._config.save_explanations:
             experiment_path = os.path.join(RESULTS_OUTPUT_DIR, self._experiment_id)
