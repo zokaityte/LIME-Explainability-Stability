@@ -1,8 +1,11 @@
-import time
+import os
 from datetime import datetime, timezone
 from typing import List, Dict
 
+import coolname
+import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
 from numpy.random import RandomState
 
 from experiment_things.models import LimeExperimentConfig, LabelExplanationMetrics
@@ -10,15 +13,21 @@ from lime.explanation import Explanation
 from lime.lime_tabular import LimeTabularExplainer
 from lime.metrics import calculate_stability
 
+RESULTS_OUTPUT_DIR = "./_experiment_results"
+RESULTS_FILE_NAME = "experiment_results.csv"
+
 
 class LimeExperiment:
 
-    def __init__(self, config: LimeExperimentConfig):
+    def __init__(self, config: LimeExperimentConfig, save_explanations=True):
+
         self._config = config
         self._explanations = None
         self._evaluation_results = None
         self._start_time = None
         self._end_time = None
+        self._experiment_id = coolname.generate_slug(3)
+        self._save_explanations = save_explanations
 
     def run(self):
 
@@ -26,14 +35,26 @@ class LimeExperiment:
             print("Experiment has already been run.")
             return
 
+        print(f"Experiment started at {datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3]} UTC")
         self._start_time = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3] + 'Z'
-        self._explanations = self._run_experiment(self._config.random_seed, self._config.experiment_data, self._config.explainer_config,
-                                                  self._config.times_to_run, self._config.explained_model, self._config.mode)
+
+        print("Running the experiment...")
+        self._explanations = self._run_experiment(self._config.random_seed, self._config.experiment_data,
+                                                  self._config.explainer_config, self._config.times_to_run,
+                                                  self._config.explained_model, self._config.mode)
+
+        print("Experiment run complete. Starting evaluation of explanations...")
         self._evaluation_results = self._evaluate_explanations(self._explanations)
+
         self._end_time = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3] + 'Z'
+        print(f"Experiment completed at {self._end_time} UTC")
+
+        print("Saving results...")
+        self._save_results()
 
     @staticmethod
-    def _run_experiment(random_seed, experiment_data, explainer_config, times_to_run, explained_model, mode) -> List[Explanation]:
+    def _run_experiment(random_seed, experiment_data, explainer_config, times_to_run, explained_model, mode) -> List[
+        Explanation]:
 
         if random_seed is not None:
             experiment_random_state = RandomState(random_seed)
@@ -59,6 +80,7 @@ class LimeExperiment:
         explanations = []
 
         for i in range(times_to_run):
+            print(f"Running iteration {i + 1}/{times_to_run}...")
             if random_seed is not None:
                 experiment_random_state.seed(random_seed)
             explanation = explainer.explain_instance(data_row=test_instance,
@@ -68,8 +90,8 @@ class LimeExperiment:
                                                      num_samples=explainer_config.num_samples)
             explanations.append(explanation)
 
+        print(f"Completed {times_to_run} iterations.")
         return explanations
-
 
     @staticmethod
     def _evaluate_explanations(explanations: List[Explanation]) -> Dict[str, LabelExplanationMetrics]:
@@ -97,6 +119,7 @@ class LimeExperiment:
 
             # Store the results using the LabelExplanationMetrics dataclass
             results[label] = LabelExplanationMetrics(fidelity=fidelity_metric, stability=stability_metric)
+            print(f"Label {label} evaluated: Fidelity = {fidelity_metric}, Stability = {stability_metric}")
 
         return results
 
@@ -111,8 +134,36 @@ class LimeExperiment:
             evaluation_results.update({f"Stability (label = {label})": metrics.stability})
             evaluation_results.update({f"Mean R2 (label = {label})": metrics.fidelity})
 
-        results = {"start_time": self._start_time, "end_time": self._end_time}
+        results = {"id": self._experiment_id, "start_time": self._start_time, "end_time": self._end_time}
         results.update(self._config.as_records_dict())
         results.update(evaluation_results)
 
         return results
+
+    def _save_results(self):
+
+        os.makedirs(RESULTS_OUTPUT_DIR, exist_ok=True)
+
+        results = self.get_results()
+        results_file_path = os.path.join(RESULTS_OUTPUT_DIR, RESULTS_FILE_NAME)
+
+        if os.path.exists(results_file_path):
+            pd.DataFrame([results]).to_csv(results_file_path, mode='a', header=False, index=False)
+        else:
+            pd.DataFrame([results]).to_csv(results_file_path, mode='w', header=True, index=False)
+
+        if os.path.exists(results_file_path):
+            print(f"Results successfully saved to {results_file_path}")
+        else:
+            print(f"Error: Failed to save results to {results_file_path}")
+
+        if self._save_explanations:
+            experiment_path = os.path.join(RESULTS_OUTPUT_DIR, self._experiment_id)
+            os.makedirs(experiment_path, exist_ok=True)
+            for i, explanation in enumerate(self._explanations):
+                for label in explanation.available_labels():
+                    with open(os.path.join(experiment_path, f"explanation_{i}_{label}.txt"), "w") as f:
+                        f.write(str(explanation.as_list(label)))
+                    explanation.as_pyplot_figure(label).savefig(
+                        os.path.join(experiment_path, f"explanation_{i}_{label}.png"))
+                    plt.close()
