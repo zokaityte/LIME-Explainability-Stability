@@ -1,8 +1,8 @@
 import unittest
-from experiment.experiment import LimeExperiment
-from experiment.experiment_data import ExperimentData
-from experiment.explained_model import ExplainedModel
-from experiment.models import LimeExplainerConfig, LimeExperimentConfig
+from lime_experiment.experiment import LimeExperiment
+from lime_experiment.experiment_data import ExperimentData
+from lime_experiment.explained_model import ExplainedModel
+from lime_experiment.models import LimeExplainerConfig, LimeExperimentConfig
 
 class TestLimeExperiment(unittest.TestCase):
 

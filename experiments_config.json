@@ -1,0 +1,38 @@
+{
+  "experiments": [
+    {
+      "model_path": "./model_checkpoints/test_rf_model.pkl",
+      "dataset_path": "./datasets/sample_dataset_2",
+      "label_names": ["0labelname", "1labelname", "2labelname"],
+      "categorical_columns_names": null,
+      "explainer_config": {
+        "kernel_width": 3,
+        "kernel": null,
+        "sample_around_instance": false,
+        "num_features": 1,
+        "num_samples": 5000,
+        "sampling_func": "gaussian",
+        "sampling_func_params": {}
+      },
+      "times_to_run": 10,
+      "random_seed": null
+    },
+    {
+      "model_path": "./model_checkpoints/test_rf_model.pkl",
+      "dataset_path": "./datasets/sample_dataset_2",
+      "label_names": ["0labelname", "1labelname", "2labelname"],
+      "categorical_columns_names": null,
+      "explainer_config": {
+        "kernel_width": 3,
+        "kernel": null,
+        "sample_around_instance": false,
+        "num_features": 1,
+        "num_samples": 1000,
+        "sampling_func": "gaussian",
+        "sampling_func_params": {}
+      },
+      "times_to_run": 10,
+      "random_seed": null
+    }
+  ]
+}

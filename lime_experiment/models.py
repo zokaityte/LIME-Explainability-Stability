@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 
-from experiment.explained_model import ExplainedModel
-from experiment.experiment_data import ExperimentData
+from lime_experiment.explained_model import ExplainedModel
+from lime_experiment.experiment_data import ExperimentData
 
 
 @dataclass
