@@ -1,4 +1,5 @@
 import os
+import random
 
 import pandas as pd
 
@@ -17,6 +18,8 @@ class ExperimentData:
         self.features_np = self.training_data[self.training_data.columns[:-1]].to_numpy()
         self.labels_np = self.training_data[self.training_data.columns[-1]]
 
+        self.random_text_row_index = None
+
     def get_training_data(self):
         print("Warning: training data not implemented")
 
@@ -27,8 +30,24 @@ class ExperimentData:
         return self.labels_np
 
     def get_random_test_instance(self, random_seed):
-        print("Warning: random test instance not implemented")
-        return self.features_np[0, :]
+        """Selects a random row from the test data without loading the entire CSV into memory."""
+        # Set the random seed for reproducibility
+        if random_seed is not None:
+            random.seed(random_seed)
+
+        # Get the total number of rows (excluding the header)
+        with open(self.test_data_csv_path, 'r') as f:
+            row_count = sum(1 for _ in f) - 1  # Subtract 1 for the header row
+
+        # Select a random row index (between 1 and row_count, skipping the header)
+        random_row_index = random.randint(1, row_count)
+        self.random_text_row_index = random_row_index
+
+        # Read only the selected row (skip all rows except the randomly selected one)
+        random_row = pd.read_csv(self.test_data_csv_path, skiprows=range(1, random_row_index), nrows=1)
+        random_row_features = random_row.iloc[:, :-1]
+        random_row_features_numpy = random_row_features.to_numpy().flatten()
+        return random_row_features_numpy
 
     def get_num_classes(self):
         return len(set(self.labels_np))

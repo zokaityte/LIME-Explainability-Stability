@@ -39,15 +39,16 @@ class TestLimeExperiment(unittest.TestCase):
         experiment.run()
 
         # Expected explanation for the first class
-        expected_explanation = [
-            ('feature_3', 0.0438319465223157), ('feature_2', -0.04357798786216229),
-            ('feature_0', 0.03887729586806089), ('feature_4', 0.019489294650031273),
-            ('feature_1', -0.014745938524001936)
-        ]
+        expected_explanation = [('feature_2', -0.042447470132049844),
+                                ('feature_0', 0.03661369437283125),
+                                ('feature_3', 0.03275282434566029),
+                                ('feature_4', 0.025438416754464212),
+                                ('feature_1', -0.017154380819803368)]
 
         # Verify explanations
         for explanation in experiment._explanations:
             actual_explanation = explanation.as_list(1)
+            print(actual_explanation)
             for i, (feature, value) in enumerate(expected_explanation):
                 with self.subTest(i=i):
                     self.assertEqual(actual_explanation[i][0], feature)
@@ -55,6 +56,7 @@ class TestLimeExperiment(unittest.TestCase):
 
         # Verify experiment results
         results = experiment.get_results()
+        print(results)
         expected_results = {
             'dataset': '../datasets/sample_dataset_2',
             'number_of features': 10,
@@ -70,12 +72,12 @@ class TestLimeExperiment(unittest.TestCase):
             'num_samples': 5000,
             'sampling_func': 'gaussian',
             'sampling_func_params': {},
-            'Stability (label = 0)': 1.0,
-            'Mean R2 (label = 0)': 0.7564361967710524,
             'Stability (label = 1)': 1.0,
-            'Mean R2 (label = 1)': 0.317653604546987,
+            'Mean R2 (label = 1)': 0.2835911042919463,
             'Stability (label = 2)': 1.0,
-            'Mean R2 (label = 2)': 0.7089835361931554
+            'Mean R2 (label = 2)': 0.706446360709742,
+            'Stability (label = 0)': 1.0,
+            'Mean R2 (label = 0)': 0.7376951927688562
         }
 
         for key, value in expected_results.items():
