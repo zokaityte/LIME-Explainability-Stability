@@ -40,9 +40,9 @@ class TestLimeExperiment(unittest.TestCase):
 
         # Expected explanation for the first class
         expected_explanation = [
-            ('3', 0.0438319465223157), ('2', -0.04357798786216229),
-            ('0', 0.03887729586806089), ('4', 0.019489294650031273),
-            ('1', -0.014745938524001936)
+            ('feature_3', 0.0438319465223157), ('feature_2', -0.04357798786216229),
+            ('feature_0', 0.03887729586806089), ('feature_4', 0.019489294650031273),
+            ('feature_1', -0.014745938524001936)
         ]
 
         # Verify explanations

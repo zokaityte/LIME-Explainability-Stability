@@ -37,16 +37,24 @@ class ExperimentData:
         return self.label_names
 
     def get_categorical_features(self):
-        print("Warning: categorical features not implemented")
-        return None
+        """Returns the indexes of categorical columns based on the column names."""
+
+        df = pd.read_csv(self.train_data_csv_path, nrows=0)
+
+        indexes = []
+        for col_name in self.categorical_columns_names:
+            if col_name in df.columns:
+                indexes.append(df.columns.get_loc(col_name))
+
+        return indexes
 
     def get_categorical_names(self):
         print("Warning: categorical names not implemented")
         return None
 
     def get_feature_names(self):
-        print("Warning: feature names not implemented")
-        return None
+        df_header = pd.read_csv(self.train_data_csv_path, nrows=0)
+        return df_header.columns[:-1].tolist()
 
     def get_count_of_categorical_features(self):
         return len(self.categorical_columns_names)
