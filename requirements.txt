@@ -9,3 +9,4 @@ plotly
 openpyxl
 seaborn
 sklearn
+seaborn
