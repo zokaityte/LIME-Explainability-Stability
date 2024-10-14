@@ -13,6 +13,7 @@ class ExplainedModel:
 
         :param model_path: Path to the joblib serialized model file.
         """
+        self._model_path = model_path
         self._model = joblib.load(model_path)
         self._validate_model_type()
 
@@ -20,6 +21,11 @@ class ExplainedModel:
     def model_type(self):
         """Return the class name of the loaded model."""
         return self._model.__class__.__name__
+
+    @property
+    def model_path(self):
+        """Return the path to the loaded model."""
+        return self._model_path
 
     def predict_probabilities(self, x):
         """Predict class probabilities for the input data."""

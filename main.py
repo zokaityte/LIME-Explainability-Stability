@@ -32,11 +32,9 @@ def test_lime_tabular_explainer_3_classes():
 def test_multiple_runs():
 
     # SETUP
-    random_seed = 42
+    random_seed = 42 # Or None
     explained_model = ExplainedModel("model_checkpoints/test_rf_model.pkl")
-    experiment_data = ExperimentData("data/sample_dataset_2/train.csv",
-                                     "data/sample_dataset_2/val.csv",
-                                     "data/sample_dataset_2/test.csv")
+    experiment_data = ExperimentData("data/sample_dataset_2", label_names=["0labelname", "1labelname", "2labelname"])
     explainer_config = LimeExplainerConfig(**{
         'kernel_width': 3,  # Default: sqrt(num_features) * 0.75 if None
         'kernel': None,  # Default: exponential kernel function if None
@@ -49,12 +47,15 @@ def test_multiple_runs():
     times_to_run = 10
 
     # RUN
-    experiment_config = LimeExperimentConfig(explained_model, experiment_data, explainer_config, times_to_run, random_seed, "classification")
+    experiment_config = LimeExperimentConfig(explained_model, experiment_data, explainer_config, times_to_run, random_seed)
     experiment = LimeExperiment(experiment_config)
-    explanations = experiment.run()
+    experiment.run()
+
+    print(experiment.get_results())
+
 
     # Test if explanation is correct for the first class
-    for explanation in explanations:
+    for explanation in experiment._explanations:
         assert explanation.as_list(1) == [('3', 0.04383194652231568), ('2', -0.04357798786216229), ('0', 0.03887729586806089), ('4', 0.019489294650031266), ('1', -0.01474593852400193)]
 
     # Test if other display methods work
