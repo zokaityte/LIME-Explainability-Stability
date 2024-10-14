@@ -43,3 +43,8 @@ Sample `experiments_config.json`:
   ]
 }
 ```
+
+### Running tests
+1. Run tests with:
+`python -m unittest discover -s tests`
+```

@@ -1,3 +1,4 @@
+import os
 import unittest
 
 from lime_experiment.experiment import LimeExperiment
@@ -10,10 +11,15 @@ class TestLimeExperiment(unittest.TestCase):
 
     def setUp(self):
         """Setup common data for the test."""
+
+        # Convert relative paths to absolute paths
+        model_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../model_checkpoints/sample_dataset_1_rf_model.pkl"))
+        dataset_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../datasets/sample_dataset_1"))
+
         self.random_seed = 42  # Or None
-        self.explained_model = ExplainedModel("../model_checkpoints/sample_dataset_1_rf_model.pkl")
+        self.explained_model = ExplainedModel(model_path)
         self.experiment_data = ExperimentData(
-            "../datasets/sample_dataset_1",
+            dataset_path,
             label_names=["Benign", "FTP-BruteForce", "SSH-Bruteforce"],
             categorical_columns_names=["Fwd PSH Flags", "FIN Flag Cnt", "SYN Flag Cnt", "RST Flag Cnt", "PSH Flag Cnt",
                                        "ACK Flag Cnt", "URG Flag Cnt", "ECE Flag Cnt"],
@@ -60,10 +66,8 @@ class TestLimeExperiment(unittest.TestCase):
         # Verify experiment results
         results = experiment.get_results()
         expected_results = {
-            'dataset': '../datasets/sample_dataset_1',
             'number_of_features': 65,
             'number_of_categorical_features': 8,
-            'explained_model': '../model_checkpoints/sample_dataset_1_rf_model.pkl',
             'explained_model_type': 'RandomForestClassifier',
             'times_explained': 5,
             'random_seed': 42,
