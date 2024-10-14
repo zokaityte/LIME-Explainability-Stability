@@ -47,9 +47,9 @@ class LimeExperimentConfig:
 
     def as_records_dict(self):
         configuration_records_dict = {
-            "dataset": self.experiment_data.dataset_path,
-            "number_of features": self.explainer_config.num_features,
-            "number_of_categorical_features": self.experiment_data.get_count_of_categorical_features(),
+            "dataset": self.experiment_data.get_dataset_path(),
+            "number_of_features": self.experiment_data.get_feature_count(),
+            "number_of_categorical_features": self.experiment_data.get_categorical_features_count(),
             "explained_model": self.explained_model.model_path,
             "explained_model_type": self.explained_model.model_type,
             "times_explained": self.times_to_run,

@@ -1,37 +1,20 @@
 {
   "experiments": [
-    {
-      "model_path": "./model_checkpoints/test_rf_model.pkl",
-      "dataset_path": "./datasets/sample_dataset_2",
-      "label_names": ["0labelname", "1labelname", "2labelname"],
-      "categorical_columns_names": null,
+        {
+      "model_path": "./model_checkpoints/sample_dataset_1_rf_model.pkl",
+      "dataset_path": "./datasets/sample_dataset_1",
+      "label_names": ["Benign", "FTP-BruteForce", "SSH-Bruteforce"],
+      "categorical_columns_names": ["Fwd PSH Flags", "FIN Flag Cnt", "SYN Flag Cnt", "RST Flag Cnt", "PSH Flag Cnt", "ACK Flag Cnt", "URG Flag Cnt", "ECE Flag Cnt"],
       "explainer_config": {
-        "kernel_width": 3,
+        "kernel_width": null,
         "kernel": null,
         "sample_around_instance": false,
-        "num_features": 1,
-        "num_samples": 5000,
-        "sampling_func": "gaussian",
-        "sampling_func_params": {}
-      },
-      "times_to_run": 10,
-      "random_seed": null
-    },
-    {
-      "model_path": "./model_checkpoints/test_rf_model.pkl",
-      "dataset_path": "./datasets/sample_dataset_2",
-      "label_names": ["0labelname", "1labelname", "2labelname"],
-      "categorical_columns_names": null,
-      "explainer_config": {
-        "kernel_width": 3,
-        "kernel": null,
-        "sample_around_instance": false,
-        "num_features": 1,
+        "num_features": 10,
         "num_samples": 1000,
         "sampling_func": "gaussian",
         "sampling_func_params": {}
       },
-      "times_to_run": 10,
+      "times_to_run": 30,
       "random_seed": null
     }
   ]

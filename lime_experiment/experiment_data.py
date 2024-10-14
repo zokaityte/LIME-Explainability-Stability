@@ -3,34 +3,29 @@ import random
 
 import pandas as pd
 
+CHUNK_SIZE = 10000
+
 
 class ExperimentData:
 
     def __init__(self, dataset_path: str, label_names: list, categorical_columns_names=None):
-        self.dataset_path = dataset_path
-        self.train_data_csv_path = os.path.join(self.dataset_path, "train_data.csv")
-        self.val_data_csv_path = os.path.join(self.dataset_path, "val_data.csv")
-        self.test_data_csv_path = os.path.join(self.dataset_path, "test_data.csv")
-        self.label_names = label_names
-        self.categorical_columns_names = categorical_columns_names if categorical_columns_names else []
-
-        self.training_data = pd.read_csv(self.train_data_csv_path)
-        self.features_np = self.training_data[self.training_data.columns[:-1]].to_numpy()
-        self.labels_np = self.training_data[self.training_data.columns[-1]]
-
+        self._dataset_path = dataset_path
+        self._train_data_csv_path = os.path.join(self._dataset_path, "train_data.csv")
+        self._val_data_csv_path = os.path.join(self._dataset_path, "val_data.csv")
+        self._test_data_csv_path = os.path.join(self._dataset_path, "test_data.csv")
+        self._label_names = label_names
+        self._categorical_columns_names = categorical_columns_names if categorical_columns_names else []
+        self._column_names = self._get_column_names()
         self.random_text_row_index = None
 
     def get_training_data(self):
-        print("Warning: training data not implemented")
-
-        return self.features_np
+        # TODO Check if validation split is needed
+        return pd.read_csv(self._train_data_csv_path, engine="pyarrow", usecols=self._column_names[:-1]).to_numpy()
 
     def get_training_labels(self):
-        print("Warning: training labels not implemented")
-        return self.labels_np
+        return pd.read_csv(self._train_data_csv_path, engine="pyarrow", usecols=[self._column_names[-1]]).to_numpy()
 
     def get_random_test_instance(self, random_seed):
-        """Selects a random row from the test data without loading the entire CSV into memory."""
         # Set the random seed for reproducibility
         if random_seed is not None:
             random.seed(random_seed)
@@ -44,36 +39,65 @@ class ExperimentData:
         self.random_text_row_index = random_row_index
 
         # Read only the selected row (skip all rows except the randomly selected one)
-        random_row = pd.read_csv(self.test_data_csv_path, skiprows=range(1, random_row_index), nrows=1)
+        random_row = pd.read_csv(self._test_data_csv_path, skiprows=range(1, random_row_index), nrows=1)
         random_row_features = random_row.iloc[:, :-1]
         random_row_features_numpy = random_row_features.to_numpy().flatten()
         return random_row_features_numpy
 
     def get_num_classes(self):
-        return len(set(self.labels_np))
+        return len(self._label_names)
 
     def get_class_names(self):
-        return self.label_names
+        return self._label_names
 
     def get_categorical_features(self):
         """Returns the indexes of categorical columns based on the column names."""
 
-        df = pd.read_csv(self.train_data_csv_path, nrows=0)
+        df = pd.read_csv(self._train_data_csv_path, nrows=0)
 
         indexes = []
-        for col_name in self.categorical_columns_names:
+        for col_name in self._categorical_columns_names:
             if col_name in df.columns:
                 indexes.append(df.columns.get_loc(col_name))
 
         return indexes
 
     def get_categorical_names(self):
-        print("Warning: categorical names not implemented")
-        return None
+        """Returns a dictionary with the index of categorical columns and their unique values from all files."""
+        files = [self._train_data_csv_path, self._val_data_csv_path, self._test_data_csv_path]
+        df_header = pd.read_csv(self._train_data_csv_path, nrows=0)
+        categorical_dict = {}
+
+        for file_path in files:
+            chunk_size = CHUNK_SIZE
+            for chunk in pd.read_csv(file_path, usecols=self._categorical_columns_names, chunksize=chunk_size):
+                for col_name in self._categorical_columns_names:
+                    col_index = df_header.columns.get_loc(col_name)
+                    if col_index not in categorical_dict:
+                        categorical_dict[col_index] = set(chunk[col_name].dropna().unique())
+                    else:
+                        categorical_dict[col_index].update(chunk[col_name].dropna().unique())
+
+        categorical_dict = {index: list(values) for index, values in categorical_dict.items()}
+        return categorical_dict
+
+    def _get_column_names(self):
+        df_header_1 = pd.read_csv(self._train_data_csv_path, nrows=0)
+        df_header_2 = pd.read_csv(self._val_data_csv_path, nrows=0)
+        df_header_3 = pd.read_csv(self._test_data_csv_path, nrows=0)
+        if df_header_1.equals(df_header_2) and df_header_2.equals(df_header_3):
+            return df_header_1.columns.tolist()
+        else:
+            raise ValueError("Feature names are not consistent across the datasets.")
 
     def get_feature_names(self):
-        df_header = pd.read_csv(self.train_data_csv_path, nrows=0)
-        return df_header.columns[:-1].tolist()
+        return self._get_column_names()[:-1]
 
-    def get_count_of_categorical_features(self):
-        return len(self.categorical_columns_names)
+    def get_categorical_features_count(self):
+        return len(self._categorical_columns_names)
+
+    def get_feature_count(self):
+        return len(self.get_feature_names())
+
+    def get_dataset_path(self):
+        return self._dataset_path
