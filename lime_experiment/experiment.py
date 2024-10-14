@@ -58,10 +58,10 @@ class LimeExperiment:
 
         if random_seed is not None:
             experiment_random_state = RandomState(random_seed)
+            test_instance = experiment_data.get_random_test_instance(random_seed)
         else:
             experiment_random_state = None
-
-        test_instance = experiment_data.get_random_test_instance(random_seed)
+            test_instance = experiment_data.get_random_test_instance(1)
 
         explainer = LimeTabularExplainer(
             training_data=experiment_data.get_training_data(),
@@ -106,6 +106,7 @@ class LimeExperiment:
                                             and stability metrics stored in a LabelExplanationMetrics dataclass.
         """
         labels = explanations[0].available_labels()
+        labels.sort()
         results = {}
 
         for label in labels:
@@ -134,7 +135,8 @@ class LimeExperiment:
             evaluation_results.update({f"Stability (label = {label})": metrics.stability})
             evaluation_results.update({f"Mean R2 (label = {label})": metrics.fidelity})
 
-        results = {"id": self._experiment_id, "start_time": self._start_time, "end_time": self._end_time}
+        results = {"id": self._experiment_id, "start_time": self._start_time, "end_time": self._end_time,
+                   "test_row_index": self._config.experiment_data.random_text_row_index}
         results.update(self._config.as_records_dict())
         results.update(evaluation_results)
 

@@ -36,7 +36,7 @@ class ExperimentData:
             random.seed(random_seed)
 
         # Get the total number of rows (excluding the header)
-        with open(self.test_data_csv_path, 'r') as f:
+        with open(self._test_data_csv_path, 'r') as f:
             row_count = sum(1 for _ in f) - 1  # Subtract 1 for the header row
 
         # Select a random row index (between 1 and row_count, skipping the header)
