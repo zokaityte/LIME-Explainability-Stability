@@ -1,31 +1,35 @@
 import unittest
+
 from lime_experiment.experiment import LimeExperiment
 from lime_experiment.experiment_data import ExperimentData
 from lime_experiment.explained_model import ExplainedModel
 from lime_experiment.models import LimeExplainerConfig, LimeExperimentConfig
+
 
 class TestLimeExperiment(unittest.TestCase):
 
     def setUp(self):
         """Setup common data for the test."""
         self.random_seed = 42  # Or None
-        self.explained_model = ExplainedModel("../model_checkpoints/test_rf_model.pkl")
+        self.explained_model = ExplainedModel("../model_checkpoints/sample_dataset_1_rf_model.pkl")
         self.experiment_data = ExperimentData(
-            "../datasets/sample_dataset_2",
-            label_names=["0labelname", "1labelname", "2labelname"]
+            "../datasets/sample_dataset_1",
+            label_names=["Benign", "FTP-BruteForce", "SSH-Bruteforce"],
+            categorical_columns_names=["Fwd PSH Flags", "FIN Flag Cnt", "SYN Flag Cnt", "RST Flag Cnt", "PSH Flag Cnt",
+                                       "ACK Flag Cnt", "URG Flag Cnt", "ECE Flag Cnt"],
         )
 
         self.explainer_config = LimeExplainerConfig(**{
-            'kernel_width': 3,
+            'kernel_width': None,
             'kernel': None,
             'sample_around_instance': False,
-            'num_features': 10,
+            'num_features': 5,
             'num_samples': 5000,
             'sampling_func': 'gaussian',
             'sampling_func_params': {}
         })
 
-        self.times_to_run = 10
+        self.times_to_run = 5
 
     def test_experiment_run(self):
         """Test the experiment run and verify explanations."""
@@ -39,16 +43,15 @@ class TestLimeExperiment(unittest.TestCase):
         experiment.run()
 
         # Expected explanation for the first class
-        expected_explanation = [('feature_2', -0.042447470132049844),
-                                ('feature_0', 0.03661369437283125),
-                                ('feature_3', 0.03275282434566029),
-                                ('feature_4', 0.025438416754464212),
-                                ('feature_1', -0.017154380819803368)]
+        expected_explanation = [('ACK Flag Cnt=0', 0.06637493923858132),
+                                ('Flow Pkts/s', 0.03886579142502093),
+                                ('Init Fwd Win Byts', 0.023605242420647873),
+                                ('Subflow Fwd Pkts', -0.023575766513791962),
+                                ('Bwd Pkts/s', 0.02324818707547263)]
 
         # Verify explanations
         for explanation in experiment._explanations:
             actual_explanation = explanation.as_list(1)
-            print(actual_explanation)
             for i, (feature, value) in enumerate(expected_explanation):
                 with self.subTest(i=i):
                     self.assertEqual(actual_explanation[i][0], feature)
@@ -56,28 +59,27 @@ class TestLimeExperiment(unittest.TestCase):
 
         # Verify experiment results
         results = experiment.get_results()
-        print(results)
         expected_results = {
-            'dataset': '../datasets/sample_dataset_2',
-            'number_of features': 10,
-            'number_of_categorical_features': 0,
-            'explained_model': '../model_checkpoints/test_rf_model.pkl',
+            'dataset': '../datasets/sample_dataset_1',
+            'number_of_features': 65,
+            'number_of_categorical_features': 8,
+            'explained_model': '../model_checkpoints/sample_dataset_1_rf_model.pkl',
             'explained_model_type': 'RandomForestClassifier',
-            'times_explained': 10,
+            'times_explained': 5,
             'random_seed': 42,
-            'kernel_width': 3,
+            'kernel_width': 'default (sqrt(num_features) * 0.75)',
             'kernel': 'default (exponential)',
             'sample_around_instance': False,
-            'num_features': 10,
+            'num_features': 5,
             'num_samples': 5000,
             'sampling_func': 'gaussian',
             'sampling_func_params': {},
             'Stability (label = 1)': 1.0,
-            'Mean R2 (label = 1)': 0.2835911042919463,
+            'Mean R2 (label = 1)': 0.25875204620545944,
             'Stability (label = 2)': 1.0,
-            'Mean R2 (label = 2)': 0.706446360709742,
+            'Mean R2 (label = 2)': 0.13010193899788192,
             'Stability (label = 0)': 1.0,
-            'Mean R2 (label = 0)': 0.7376951927688562
+            'Mean R2 (label = 0)': 0.24258214084437704
         }
 
         for key, value in expected_results.items():
@@ -85,16 +87,6 @@ class TestLimeExperiment(unittest.TestCase):
                 self.assertAlmostEqual(results[key], value, places=7)
             else:
                 self.assertEqual(results[key], value)
-
-    def test_explanation_display_methods(self):
-        """Test the display methods for explanations."""
-        # RUN
-        experiment_config = LimeExperimentConfig(
-            self.explained_model, self.experiment_data, self.explainer_config,
-            self.times_to_run, self.random_seed, save_explanations=False, save_results=False
-        )
-        experiment = LimeExperiment(experiment_config)
-        experiment.run()
 
         # Test if other display methods work
         explanation = experiment._explanations[0]
