@@ -10,9 +10,9 @@ from model.decision_tree import DecisionTreeClassifierModel
 from model.regression import LinearRegressionModel
 from model.knn import KNeighborsClassifierModel
 
-DATA_DIR = '.\data'
+DATA_DIR = 'data'
 DATASET_DIR = 'sample_dataset_1'
-MODELS_DIR = '.\model_checkpoints'
+MODELS_DIR = 'model_checkpoints'
 
 CATEGORICAL_FEATURES = ["Dst Port", 'Timestamp', 'Label', 'Protocol', 'Fwd PSH Flags', 'FIN Flag Cnt', 'SYN Flag Cnt',
                         'RST Flag Cnt', 'PSH Flag Cnt', 'ACK Flag Cnt', 'URG Flag Cnt', 'ECE Flag Cnt',
@@ -33,7 +33,7 @@ CATEGORICAL_FEATURES = [col for col in CATEGORICAL_FEATURES if col not in COLUMN
 # TODO^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
-def load_data(print_details=False):
+def load_data(print_details=False, encode_labels=True):
     train_data_path = os.path.join(DATA_DIR, DATASET_DIR, 'train_data.csv')
     val_data_path = os.path.join(DATA_DIR, DATASET_DIR, 'val_data.csv')
     test_data_path = os.path.join(DATA_DIR, DATASET_DIR, 'test_data.csv')
@@ -62,15 +62,16 @@ def load_data(print_details=False):
     val_x, val_y = val_data.iloc[:, :-1], val_data.iloc[:, -1]
     test_x, test_y = test_data.iloc[:, :-1], test_data.iloc[:, -1]
 
-    # Setup encoder for labels
-    label_encoder = LabelEncoder()
-    label_encoder.fit(pd.concat([train_y, val_y, test_y]))
-    class_names = label_encoder.classes_
+    if encode_labels:
+        # Setup encoder for labels
+        label_encoder = LabelEncoder()
+        label_encoder.fit(pd.concat([train_y, val_y, test_y]))
+        class_names = label_encoder.classes_
 
-    # Encode labels
-    train_y = label_encoder.transform(train_y)
-    val_y = label_encoder.transform(val_y)
-    test_y = label_encoder.transform(test_y)
+        # Encode labels
+        train_y = label_encoder.transform(train_y)
+        val_y = label_encoder.transform(val_y)
+        test_y = label_encoder.transform(test_y)
 
     # Turn to numpy arrays
     train_x_np = train_x.to_numpy()
@@ -84,36 +85,31 @@ def load_data(print_details=False):
 
 
 
-def train_random_forest(save_dir):
-    train_x_np, val_x_np, test_x_np, train_y, val_y, test_y = load_data()
+def train_random_forest(save_dir, train_x, val_x, test_x, train_y, val_y, test_y):
     for i in range(1,3):
         n_estimators=i
         random_state=i
         max_depth=i
         max_features=i
-        # model = LinearRegressionModel(fit_intercept=True)
+
         model = RandomForestClassifierModel(n_estimators=n_estimators, random_state=random_state, max_depth=max_depth, max_features=max_features)
 
-        # model = DecisionTreeClassifierModel(random_state=0, max_depth=5, max_features=5)
         model.generate_output_path(save_dir)
-        model.train(train_x_np, train_y)
-        model.evaluate(val_x_np, val_y)
+        model.train(train_x, train_y)
+        model.evaluate(val_x, val_y)
         model.save()
 
 
-def train_regression(save_dir):
+def train_regression(save_dir, train_x, val_x, test_x, train_y, val_y, test_y):
     model = LinearRegressionModel(fit_intercept=True)
 
-    train_x_np, val_x_np, test_x_np, train_y, val_y, test_y = load_data()
-
     model.generate_output_path(save_dir)
-    model.train(train_x_np, train_y)
-    model.evaluate(val_x_np, val_y)
+    model.train(train_x, train_y)
+    model.evaluate(val_x, val_y)
     model.save()
 
 
-def train_decision_tree(save_dir):
-    train_x_np, val_x_np, test_x_np, train_y, val_y, test_y = load_data()
+def train_decision_tree(save_dir, train_x, val_x, test_x, train_y, val_y, test_y):
     for i in range(3,7):
         random_state=i
         max_depth=i
@@ -122,13 +118,12 @@ def train_decision_tree(save_dir):
         model = DecisionTreeClassifierModel(random_state=random_state, max_depth=max_depth, max_features=max_features)
 
         model.generate_output_path(save_dir)
-        model.train(train_x_np, train_y)
-        model.evaluate(val_x_np, val_y)
+        model.train(train_x, train_y)
+        model.evaluate(val_x, val_y)
         model.save()
 
 
-def train_knn(save_dir):
-    train_x_np, val_x_np, test_x_np, train_y, val_y, test_y = load_data()
+def train_knn(save_dir, train_x, val_x, test_x, train_y, val_y, test_y):
     for i in range(3,7):
         n_neighbors=i
         weights='uniform' #{‘uniform’, ‘distance’}
@@ -137,21 +132,28 @@ def train_knn(save_dir):
         model = KNeighborsClassifierModel(n_neighbors=n_neighbors, weights=weights, algorithm=algorithm)
 
         model.generate_output_path(save_dir)
-        model.train(train_x_np, train_y)
-        model.evaluate(val_x_np, val_y)
+        model.train(train_x, train_y)
+        model.evaluate(val_x, val_y)
         model.save()
 
 
-if not os.path.exists(MODELS_DIR):
-    os.makedirs(MODELS_DIR)
 
-checkpoint_dir = f'{MODELS_DIR}/{DATASET_DIR}'
+if __name__ == '__main__':
+    # create missing dirs
+    if not os.path.exists(MODELS_DIR):
+        os.makedirs(MODELS_DIR)
 
-if not os.path.exists(checkpoint_dir):
-    os.makedirs(checkpoint_dir)
+    checkpoint_dir = f'{MODELS_DIR}/{DATASET_DIR}'
 
+    if not os.path.exists(checkpoint_dir):
+        os.makedirs(checkpoint_dir)
 
-# train_regression(checkpoint_dir)
-# train_decision_tree(checkpoint_dir)
-train_knn(checkpoint_dir)
-# train_random_forest(checkpoint_dir)
+    # loda data
+    train_x_np, val_x_np, test_x_np, train_y, val_y, test_y = load_data(False, True)
+
+    # train model(s)
+
+    # train_regression(checkpoint_dir, train_x_np, val_x_np, test_x_np, train_y, val_y, test_y)
+    # train_decision_tree(checkpoint_dir, train_x_np, val_x_np, test_x_np, train_y, val_y, test_y)
+    train_knn(checkpoint_dir, train_x_np, val_x_np, test_x_np, train_y, val_y, test_y)
+    # train_random_forest(checkpoint_dir, train_x_np, val_x_np, test_x_np, train_y, val_y, test_y)
