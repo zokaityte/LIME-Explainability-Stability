@@ -5,6 +5,11 @@ import seaborn as sns
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.metrics import confusion_matrix, accuracy_score, precision_score, recall_score, f1_score
 import os
+import numpy as np
+
+from common.generic import printc
+from common.generic import pemji
+
 
 class KNeighborsClassifierModel:
     def __init__(self, *args, **kwargs):
@@ -18,7 +23,7 @@ class KNeighborsClassifierModel:
         if not os.path.exists(output_path):
             os.makedirs(output_path)
 
-        print(self.training_params)
+        #print(self.training_params)
         # Iterate over the kwargs and append them to the output path in the specified format
         for key, value in self.training_params.items():
             output_path += f'{key}_{value}'
@@ -46,32 +51,46 @@ class KNeighborsClassifierModel:
 
         # Export metrics to CSV
         self.export_metrics_to_csv(f'{self.output_path}.csv', accuracy, precision, recall, f1, cm)
+        
+        printc(f"{pemji('rocket')} Trained KNN metrics: Accuracy: {accuracy}, precision: {precision}, recall: {recall}, f1: {f1}", 'v')
 
         # Return all the metrics for further use
         return accuracy, precision, recall, f1, cm
 
     def save_confusion_matrix_image(self, cm, filename):
-        # Plot confusion matrix using seaborn
-        plt.figure(figsize=(8, 6))
-        sns.heatmap(cm, annot=True, fmt='d', cmap='Blues')
-        plt.title('Confusion Matrix')
-        plt.xlabel('Predicted')
-        plt.ylabel('True')
+        # Normalize the confusion matrix (optional)
+        cm_normalized = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]  # Normalize by row
+
+        plt.figure(figsize=(12, 10))  # Increase the figure size for better spacing
+        sns.heatmap(cm_normalized, annot=True, fmt='.2f', cmap='Blues', annot_kws={"size": 8}, cbar=True)  # Add colorbar and increase font size
+        plt.title('Confusion Matrix (Normalized)', fontsize=18)
+        plt.xlabel('Predicted', fontsize=16)
+        plt.ylabel('True', fontsize=16)
+
+        # Rotate tick labels for better readability
+        plt.xticks(rotation=45, ha='right', fontsize=12)
+        plt.yticks(rotation=0, fontsize=12)
+
+        # Adjust layout to avoid overlap
+        plt.tight_layout()
+
+        # Save the plot
         plt.savefig(filename)
         plt.close()
 
     def export_metrics_to_csv(self, filename, accuracy, precision, recall, f1, cm):
         # Convert the training params to a string format
-        params_str = ', '.join(f'{key}={value}' for key, value in self.training_params.items())
+        params_str = '/'.join(f'{key}={value}' for key, value in self.training_params.items())
+        delimiter = '/'
         # Create a list of metrics and confusion matrix values
         data = [
             ["Training params", "Accuracy", "Precision", "Recall", "F1", "Confusion matrix"],
-            [params_str, accuracy, precision, recall, f1, cm.tolist()]
+            [params_str, accuracy, precision, recall, f1, delimiter.join(map(str, cm.tolist()))]
         ]
 
         # Export to CSV
         with open(filename, mode='w', newline='') as file:
-            writer = csv.writer(file, delimiter='\t', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+            writer = csv.writer(file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
             writer.writerows(data)
 
     def save(self):
