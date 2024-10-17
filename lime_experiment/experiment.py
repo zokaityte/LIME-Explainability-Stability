@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 from numpy.random import RandomState
 
-from common.name_utils import generate_slug_with_seed
+from common.name_utils import generate_short_uuid
 from lime_experiment.models import LimeExperimentConfig, LabelExplanationMetrics
 from lime.explanation import Explanation
 from lime.lime_tabular import LimeTabularExplainer
@@ -26,7 +26,7 @@ class LimeExperiment:
         self._evaluation_results = None
         self._start_time = None
         self._end_time = None
-        self._experiment_id = generate_slug_with_seed(config.random_seed)
+        self._experiment_id = generate_short_uuid()
 
     def run(self):
 
