@@ -33,7 +33,7 @@ class KNeighborsClassifierModel:
     def train(self, train_x, train_y):
         self.model.fit(train_x, train_y)
 
-    def evaluate(self, test_x, test_y):
+    def evaluate(self, test_x, test_y, current_timestamp):
         # Get the predictions
         y_pred = self.model.predict(test_x)
 
@@ -50,7 +50,7 @@ class KNeighborsClassifierModel:
         self.save_confusion_matrix_image(cm, f'{self.output_path}.png')
 
         # Export metrics to CSV
-        self.export_metrics_to_csv(f'{self.output_path}.csv', accuracy, precision, recall, f1, cm)
+        self.export_metrics_to_csv(f'{self.output_path}.csv', accuracy, precision, recall, f1, cm, current_timestamp)
         
         printc(f"{pemji('rocket')} Trained KNN metrics: Accuracy: {accuracy}, precision: {precision}, recall: {recall}, f1: {f1}", 'v')
 
@@ -78,14 +78,14 @@ class KNeighborsClassifierModel:
         plt.savefig(filename)
         plt.close()
 
-    def export_metrics_to_csv(self, filename, accuracy, precision, recall, f1, cm):
+    def export_metrics_to_csv(self, filename, accuracy, precision, recall, f1, cm, current_timestamp):
         # Convert the training params to a string format
         params_str = '/'.join(f'{key}={value}' for key, value in self.training_params.items())
         delimiter = '/'
         # Create a list of metrics and confusion matrix values
         data = [
-            ["Training params", "Accuracy", "Precision", "Recall", "F1", "Confusion matrix"],
-            [params_str, accuracy, precision, recall, f1, delimiter.join(map(str, cm.tolist()))]
+            ["Timestamp", "Training params", "Accuracy", "Precision weighted", "Recall weighted", "F1 weighted", "Confusion matrix"],
+            [current_timestamp, params_str, accuracy, precision, recall, f1, delimiter.join(map(str, cm.tolist()))]
         ]
 
         # Export to CSV

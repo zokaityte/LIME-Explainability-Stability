@@ -30,7 +30,7 @@ class LinearRegressionModel:
     def train(self, train_x, train_y):
         self.model.fit(train_x, train_y)
 
-    def evaluate(self, test_x, test_y):
+    def evaluate(self, test_x, test_y, current_timestamp):
         # Get the predictions
         y_pred = self.model.predict(test_x)
 
@@ -39,20 +39,20 @@ class LinearRegressionModel:
         r2 = r2_score(test_y, y_pred)
 
         # Export metrics to CSV
-        self.export_metrics_to_csv(f'{self.output_path}.csv', mse, r2)
+        self.export_metrics_to_csv(f'{self.output_path}.csv', mse, r2, current_timestamp)
 
         printc(f"{pemji('rocket')} Trained Regression metrics: MSE: {mse}, R-Squared: {r2}", 'v')
 
         # Return all the metrics for further use
         return mse, r2
 
-    def export_metrics_to_csv(self, filename, mse, r2):
+    def export_metrics_to_csv(self, filename, mse, r2, current_timestamp):
         # Convert the training params to a string format
         params_str = '/'.join(f'{key}={value}' for key, value in self.training_params.items())
         # Create a list of metrics
         data = [
-            ["Training params", "Mean Squared Error", "R-squared"],
-            [params_str, mse, r2]
+            ["Timestamp", "Training params", "Mean Squared Error", "R-squared"],
+            [current_timestamp, params_str, mse, r2]
         ]
 
         # Export to CSV
