@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 from numpy.random import RandomState
 
-from common.name_utils import generate_slug_with_seed
+from common.name_utils import generate_short_uuid
 from lime_experiment.models import LimeExperimentConfig, LabelExplanationMetrics
 from lime.explanation import Explanation
 from lime.lime_tabular import LimeTabularExplainer
@@ -26,7 +26,7 @@ class LimeExperiment:
         self._evaluation_results = None
         self._start_time = None
         self._end_time = None
-        self._experiment_id = generate_slug_with_seed(config.random_seed)
+        self._experiment_id = generate_short_uuid()
 
     def run(self):
 
@@ -130,7 +130,9 @@ class LimeExperiment:
             print("Experiment has not been run yet.")
             return
 
-        evaluation_results = {}
+        stability = np.mean([metrics.stability for metrics in self._evaluation_results.values()])
+        fidelity = np.mean([metrics.fidelity for metrics in self._evaluation_results.values()])
+        evaluation_results = {"Stability (average)": stability, "Mean R2 (average)": fidelity}
         for label, metrics in self._evaluation_results.items():
             evaluation_results.update({f"Stability (label = {label})": metrics.stability})
             evaluation_results.update({f"Mean R2 (label = {label})": metrics.fidelity})

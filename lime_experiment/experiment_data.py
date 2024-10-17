@@ -107,6 +107,9 @@ class ExperimentData:
     def get_categorical_features_count(self):
         return len(self._categorical_columns_names)
 
+    def get_categorical_features_names(self):
+        return self._categorical_columns_names
+
     def get_feature_count(self):
         return len(self.get_feature_names())
 

@@ -47,13 +47,14 @@ class LimeExperimentConfig:
 
     def as_records_dict(self):
         configuration_records_dict = {
+            "times_explained": self.times_to_run,
+            "random_seed": self.random_seed,
             "dataset": self.experiment_data.get_dataset_path(),
             "number_of_features": self.experiment_data.get_feature_count(),
             "number_of_categorical_features": self.experiment_data.get_categorical_features_count(),
+            "categorical_features": self.experiment_data.get_categorical_features_names(),
             "explained_model": self.explained_model.model_path,
             "explained_model_type": self.explained_model.model_type,
-            "times_explained": self.times_to_run,
-            "random_seed": self.random_seed,
         }
         configuration_records_dict.update(self.explainer_config.as_records_dict())
         return configuration_records_dict
