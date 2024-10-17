@@ -130,7 +130,9 @@ class LimeExperiment:
             print("Experiment has not been run yet.")
             return
 
-        evaluation_results = {}
+        stability = np.mean([metrics.stability for metrics in self._evaluation_results.values()])
+        fidelity = np.mean([metrics.fidelity for metrics in self._evaluation_results.values()])
+        evaluation_results = {"Stability (average)": stability, "Mean R2 (average)": fidelity}
         for label, metrics in self._evaluation_results.items():
             evaluation_results.update({f"Stability (label = {label})": metrics.stability})
             evaluation_results.update({f"Mean R2 (label = {label})": metrics.fidelity})
