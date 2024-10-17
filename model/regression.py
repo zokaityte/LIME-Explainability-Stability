@@ -4,6 +4,10 @@ from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_squared_error, r2_score
 import os
 
+from common.generic import printc
+from common.generic import pemji
+
+
 class LinearRegressionModel:
     def __init__(self, *args, **kwargs):
         self.output_path = None
@@ -34,19 +38,17 @@ class LinearRegressionModel:
         mse = mean_squared_error(test_y, y_pred)
         r2 = r2_score(test_y, y_pred)
 
-        # Print metrics
-        print(f"Mean Squared Error: {mse}")
-        print(f"R-squared: {r2}")
-
         # Export metrics to CSV
         self.export_metrics_to_csv(f'{self.output_path}.csv', mse, r2)
+
+        printc(f"{pemji('rocket')} Trained Regression metrics: MSE: {mse}, R-Squared: {r2}", 'v')
 
         # Return all the metrics for further use
         return mse, r2
 
     def export_metrics_to_csv(self, filename, mse, r2):
         # Convert the training params to a string format
-        params_str = ', '.join(f'{key}={value}' for key, value in self.training_params.items())
+        params_str = '/'.join(f'{key}={value}' for key, value in self.training_params.items())
         # Create a list of metrics
         data = [
             ["Training params", "Mean Squared Error", "R-squared"],

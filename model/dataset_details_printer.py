@@ -1,3 +1,7 @@
+from common.generic import printc
+from common.generic import pemji
+
+
 def print_dataset_details(train_x, val_x, test_x, class_names, categorical_features):
     print("Created dataset (train, val, test):", train_x.shape, val_x.shape, test_x.shape)
     print("Y labels:", class_names)
@@ -14,16 +18,16 @@ def print_dataset_details(train_x, val_x, test_x, class_names, categorical_featu
     continuous_columns = [col for col in train_x.columns if col not in categorical_features]
 
     # Feature summary
-    print(f"Total number of features: {len(train_x.columns)}\n")
+    printc(f"{pemji('')} Total number of features: {len(train_x.columns)}\n", 'v')
 
     # Categorical columns with their indices, names, and categories
-    print(f"Categorical columns ({len(categorical_columns_dict)}):")
+    printc(f"{pemji('')} Categorical columns ({len(categorical_columns_dict)}):", 'v')
     for col_index, categories in categorical_columns_dict.items():
         col_name = train_x.columns[int(col_index)]  # Ensure col_index is treated as integer
         print(f"  - Index: {col_index}, Name: {col_name}, Categories: {categories}")
 
     # Continuous columns with their indices and names
-    print(f"\nContinuous columns ({len(continuous_columns)}):")
+    printc(f"\n{pemji('')} Continuous columns ({len(continuous_columns)}):", 'v')
     for col in continuous_columns:
         col_index = train_x.columns.get_loc(col)
         print(f"  - Index: {col_index}, Name: {col}")
