@@ -16,7 +16,7 @@ from scipy.stats.distributions import norm
 
 from . import explanation
 from .lime_base import LimeBase
-from perturbations import alpha_stable, beta, gama, pareto, weibull
+from perturbations import beta, weibull, alpha_stable, gama, pareto
 
 
 class TableDomainMapper(explanation.DomainMapper):

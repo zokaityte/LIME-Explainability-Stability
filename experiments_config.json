@@ -1,0 +1,21 @@
+{
+  "experiments": [
+        {
+      "model_path": "./tests/sample_dataset_1_rf_model.pkl",
+      "dataset_path": "./data/sample_dataset_1",
+      "label_names": ["Benign", "FTP-BruteForce", "SSH-Bruteforce"],
+      "categorical_columns_names": ["Fwd PSH Flags", "FIN Flag Cnt", "SYN Flag Cnt", "RST Flag Cnt", "PSH Flag Cnt", "ACK Flag Cnt", "URG Flag Cnt", "ECE Flag Cnt"],
+      "explainer_config": {
+        "kernel_width": null,
+        "kernel": null,
+        "sample_around_instance": false,
+        "num_features": 10,
+        "num_samples": 1000,
+        "sampling_func": "gaussian",
+        "sampling_func_params": {}
+      },
+      "times_to_run": 30,
+      "random_seed": null
+    }
+  ]
+}
