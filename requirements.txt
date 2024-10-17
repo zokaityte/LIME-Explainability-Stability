@@ -11,5 +11,6 @@ coolname~=2.2.0
 pyarrow
 tqdm~=4.66.5
 joblib~=1.4.2
-pydot
-graphviz
+pydot~=3.0.2
+graphviz~=0.20.3
+coolname~=2.2.0

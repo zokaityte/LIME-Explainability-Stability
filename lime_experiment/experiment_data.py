@@ -1,5 +1,7 @@
 import os
 import random
+import numpy as np
+from sklearn.impute import SimpleImputer
 
 import pandas as pd
 
@@ -10,9 +12,9 @@ class ExperimentData:
 
     def __init__(self, dataset_path: str, label_names: list, categorical_columns_names=None):
         self._dataset_path = dataset_path
-        self._train_data_csv_path = os.path.join(self._dataset_path, "train_data.csv")
-        self._val_data_csv_path = os.path.join(self._dataset_path, "val_data.csv")
-        self._test_data_csv_path = os.path.join(self._dataset_path, "test_data.csv")
+        self._train_data_csv_path = os.path.join(self._dataset_path, "train.csv")
+        self._val_data_csv_path = os.path.join(self._dataset_path, "val.csv")
+        self._test_data_csv_path = os.path.join(self._dataset_path, "test.csv")
         self._label_names = label_names
         self._categorical_columns_names = categorical_columns_names if categorical_columns_names else []
         self._column_names = self._get_column_names()
@@ -20,7 +22,16 @@ class ExperimentData:
 
     def get_training_data(self):
         # TODO Check if validation split is needed
-        return pd.read_csv(self._train_data_csv_path, engine="pyarrow", usecols=self._column_names[:-1]).to_numpy()
+
+        # float64 limit into nan
+        train_data = pd.read_csv(self._train_data_csv_path, engine="pyarrow", usecols=self._column_names[:-1])
+        train_data.replace([np.inf, -np.inf], np.nan, inplace=True)
+
+        # Nans as mean
+        imputer = SimpleImputer(strategy='mean')
+        train_data = imputer.fit_transform(train_data)
+
+        return train_data
 
     def get_training_labels(self):
         return pd.read_csv(self._train_data_csv_path, engine="pyarrow", usecols=[self._column_names[-1]]).to_numpy()
