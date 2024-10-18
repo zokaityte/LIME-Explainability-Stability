@@ -2,27 +2,29 @@ import csv
 import joblib
 import matplotlib.pyplot as plt
 import seaborn as sns
-from sklearn.neighbors import KNeighborsClassifier
+from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import confusion_matrix, accuracy_score, precision_score, recall_score, f1_score
 import os
 import numpy as np
 
+from common.generic import printc
+from common.generic import pemji
 
-class KNeighborsClassifierModel:
+
+class LogisticRegressionModel:
     def __init__(self, *args, **kwargs):
         self.test_output_path = None
         self.val_output_path = None
         self.training_params = kwargs
-        self.model = KNeighborsClassifier(*args, **kwargs)
+        self.model = LogisticRegression(*args, **kwargs)
 
     def generate_output_path(self, path):
         # Start the output path with the base path
-        output_path = f'{path}/knn/'
+        output_path = f'{path}/logreg/'
         if not os.path.exists(output_path):
             os.makedirs(output_path)
 
-        #print(self.training_params)
-        # Iterate over the kwargs and append them to the output path in the specified format
+        # Append the kwargs to the output path in the specified format
         for key, value in self.training_params.items():
             output_path += f'{key}_{value}'
 
@@ -66,6 +68,15 @@ class KNeighborsClassifierModel:
                                    macro_precision, macro_recall, macro_f1,
                                    cm, current_timestamp)
 
+        # Print the metrics for both weighted and non-weighted
+        printc(f"{pemji('rocket')} Trained Logistic Regression metrics:\n"
+               f"Accuracy: {accuracy}, Weighted Accuracy: {weighted_accuracy}\n"
+               f"Weighted -> Precision: {weighted_precision}, Recall: {weighted_recall}, F1: {weighted_f1}\n"
+               f"Macro (Non-weighted) -> Precision: {macro_precision}, Recall: {macro_recall}, F1: {macro_f1}", 'v')
+
+        # Return all the metrics for further use
+        return accuracy, weighted_accuracy, weighted_precision, weighted_recall, weighted_f1, macro_precision, macro_recall, macro_f1, cm
+
     def save_confusion_matrix_image(self, cm, filename):
         # Normalize the confusion matrix (optional)
         cm_normalized = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]  # Normalize by row
@@ -88,18 +99,16 @@ class KNeighborsClassifierModel:
         plt.close()
 
     def export_metrics_to_csv(self, filename, suffix, accuracy, weighted_accuracy,
-                                   weighted_precision, weighted_recall, weighted_f1,
-                                   macro_precision, macro_recall, macro_f1,
-                                   cm, current_timestamp):
+                              weighted_precision, weighted_recall, weighted_f1,
+                              macro_precision, macro_recall, macro_f1,
+                              cm, current_timestamp):
         # Convert the training params to a string format
         params_str = '/'.join(f'{key}={value}' for key, value in self.training_params.items())
         delimiter = '/'
         # Create a list of metrics and confusion matrix values
         data = [
-            ["test/val", "Timestamp", "Training params", "Accuracy weighted", "Precision weighted", "Recall weighted",
-             "F1 weighted", "Accuracy", "Precision", "Recall", "F1", "Confusion matrix"],
-            [suffix, current_timestamp, params_str, weighted_accuracy, weighted_precision, weighted_recall, weighted_f1,
-             accuracy, macro_precision, macro_recall, macro_f1, delimiter.join(map(str, cm.tolist()))]
+            ["test/val", "Timestamp", "Training params", "Accuracy weighted", "Precision weighted", "Recall weighted", "F1 weighted", "Accuracy", "Precision", "Recall", "F1", "Confusion matrix"],
+            [suffix, current_timestamp, params_str, weighted_accuracy, weighted_precision, weighted_recall, weighted_f1, accuracy, macro_precision, macro_recall, macro_f1, delimiter.join(map(str, cm.tolist()))]
         ]
 
         # Export to CSV

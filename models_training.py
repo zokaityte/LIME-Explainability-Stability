@@ -5,9 +5,9 @@ import numpy as np
 import pandas as pd
 
 from model.dataset_details_printer import print_dataset_details
+from model.logistic_regression import LogisticRegressionModel
 from model.random_forest import RandomForestClassifierModel
 from model.decision_tree import DecisionTreeClassifierModel
-from model.regression import LinearRegressionModel
 from model.knn import KNeighborsClassifierModel
 from sklearn.impute import SimpleImputer
 
@@ -18,15 +18,15 @@ from common.generic import printc
 from common.generic import pemji
 
 
-DATA_DIR = 'splitted'
-DATASET_DIR = 'smoldata' # or smoldata/bigdata
+DATA_DIR = 'data'
+DATASET_DIR = 'sample_dataset_1' # or smoldata/bigdata
 MODELS_DIR = 'model_checkpoints'
 
 
 def load_data(print_details=False, encode_labels=True):
-    train_data_path = os.path.join(DATA_DIR, DATASET_DIR, 'train.csv')
-    val_data_path = os.path.join(DATA_DIR, DATASET_DIR, 'val.csv')
-    test_data_path = os.path.join(DATA_DIR, DATASET_DIR, 'test.csv')
+    train_data_path = os.path.join(DATA_DIR, DATASET_DIR, 'train_data.csv')
+    val_data_path = os.path.join(DATA_DIR, DATASET_DIR, 'val_data.csv')
+    test_data_path = os.path.join(DATA_DIR, DATASET_DIR, 'test_data.csv')
 
     # Load dataset
     train_data = pd.read_csv(train_data_path, engine="pyarrow")
@@ -93,16 +93,27 @@ def train_random_forest(strain_labels, train_features, save_dir, train_x, val_x,
     merge_csv(csv_list, "rf")
 
 
-def train_regression(save_dir, train_x, val_x, test_x, train_y, val_y, test_y, current_timestamp):
+def train_logistic_regression(save_dir, train_x, val_x, test_x, train_y, val_y, test_y, current_timestamp):
+    csv_list = []
     printc(f"{pemji('hourglass')} Training regression", 'b')
-    model = LinearRegressionModel(fit_intercept=True, n_jobs=os.cpu_count())
+    # penalty {‘l1’, ‘l2’, ‘elasticnet’, None}, default=’l2’
+    model = LogisticRegressionModel(penalty='l2')
 
     model.generate_output_path(save_dir)
     model.train(train_x, train_y)
     printc(f"{pemji('check_mark')} Trained regression", 'g')
-    model.evaluate(val_x, val_y, current_timestamp)
+
+    # test evaluation
+    model.evaluate(test_x, test_y, current_timestamp)
+    csv_list.append(f"{model.test_output_path}.csv")
+
+    # val evaluation
+    model.evaluate(val_x, val_y, current_timestamp, is_test=False)
+    csv_list.append(f"{model.val_output_path}.csv")
+
     model.save()
     printc(f"{pemji('download')} Saved regression", 'g')
+    merge_csv(csv_list, "logreg")
 
 
 def train_decision_tree(train_labels, train_features, save_dir, train_x, val_x, test_x, train_y, val_y, test_y, current_timestamp):
@@ -116,11 +127,18 @@ def train_decision_tree(train_labels, train_features, save_dir, train_x, val_x, 
         model = DecisionTreeClassifierModel(random_state=random_state, max_depth=max_depth, max_features=max_features)
 
         model.generate_output_path(save_dir)
-        csv_list.append(f"{model.output_path}.csv")
         model.train(train_x, train_y)
         printc(f"{pemji('check_mark')} Trained DF of parameters: random_state: {random_state}, max_depth: {max_depth}, max_features: {max_features}", 'g')
-        model.evaluate(val_x, val_y, current_timestamp)
+
+        # test evaluation
+        model.evaluate(test_x, test_y, current_timestamp)
+        csv_list.append(f"{model.test_output_path}.csv")
+
+        # val evaluation
+        model.evaluate(val_x, val_y, current_timestamp, is_test=False)
+        csv_list.append(f"{model.val_output_path}.csv")
         model.save()
+
         # Save tree png
         model.save_tree_image(train_labels, train_features, train_x, train_y)
         printc(f"{pemji('download')} Saved DF of parameters: random_state: {random_state}, max_depth: {max_depth}, max_features: {max_features}; to: {save_dir}", 'g')
@@ -139,10 +157,17 @@ def train_knn(save_dir, train_x, val_x, test_x, train_y, val_y, test_y, current_
         model = KNeighborsClassifierModel(n_neighbors=n_neighbors, weights=weights, algorithm=algorithm, n_jobs=os.cpu_count())
 
         model.generate_output_path(save_dir)
-        csv_list.append(f"{model.output_path}.csv")
-        model.train(train_x, train_y, current_timestamp)
+        model.train(train_x, train_y)
         printc(f"{pemji('check_mark')} Trained KNN of parameters: n_neighbors: {n_neighbors}, weights: {weights}, algorithm: {algorithm}", 'g')
-        model.evaluate(val_x, val_y)
+
+        # test evaluation
+        model.evaluate(test_x, test_y, current_timestamp)
+        csv_list.append(f"{model.test_output_path}.csv")
+
+        # val evaluation
+        model.evaluate(val_x, val_y, current_timestamp, is_test=False)
+        csv_list.append(f"{model.val_output_path}.csv")
+
         model.save()
         printc(f"{pemji('download')} Saved KNN of parameters: n_neighbors: {n_neighbors}, weights: {weights}, algorithm: {algorithm}; to: {save_dir}", 'g')
         
@@ -166,7 +191,7 @@ if __name__ == '__main__':
     current_timestamp = datetime.now().strftime('%Y-%m-%d-%H:%M')
 
     # train model(s)
-    train_regression(checkpoint_dir, train_x_np, val_x_np, test_x_np, train_y, val_y, test_y, current_timestamp)
-    train_decision_tree(train_labels, train_features, checkpoint_dir, train_x_np, val_x_np, test_x_np, train_y, val_y, test_y, current_timestamp)
-    train_random_forest(train_labels, train_features, checkpoint_dir, train_x_np, val_x_np, test_x_np, train_y, val_y, test_y, current_timestamp)
-    #train_knn(checkpoint_dir, train_x_np, val_x_np, test_x_np, train_y, val_y, test_y, current_timestamp)
+    train_logistic_regression(checkpoint_dir, train_x_np, val_x_np, test_x_np, train_y, val_y, test_y, current_timestamp)
+    # train_decision_tree(train_labels, train_features, checkpoint_dir, train_x_np, val_x_np, test_x_np, train_y, val_y, test_y, current_timestamp)
+    # train_random_forest(train_labels, train_features, checkpoint_dir, train_x_np, val_x_np, test_x_np, train_y, val_y, test_y, current_timestamp)
+    # train_knn(checkpoint_dir, train_x_np, val_x_np, test_x_np, train_y, val_y, test_y, current_timestamp)
