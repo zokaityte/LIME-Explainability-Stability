@@ -100,7 +100,7 @@ class DecisionTreeClassifierModel:
                                    cm, current_timestamp)
 
         # Print the metrics for both weighted and non-weighted
-        printc(f"{pemji('rocket')} Trained KNN metrics:\n"
+        printc(f"{pemji('rocket')} Trained DT metrics:\n"
                f"Accuracy: {accuracy}, Weighted Accuracy: {weighted_accuracy}\n"
                f"Weighted -> Precision: {weighted_precision}, Recall: {weighted_recall}, F1: {weighted_f1}\n"
                f"Macro (Non-weighted) -> Precision: {macro_precision}, Recall: {macro_recall}, F1: {macro_f1}", 'v')

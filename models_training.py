@@ -82,12 +82,19 @@ def train_random_forest(strain_labels, train_features, save_dir, train_x, val_x,
         model = RandomForestClassifierModel(n_estimators=n_estimators, random_state=random_state, max_depth=max_depth, max_features=max_features, n_jobs=os.cpu_count())
 
         model.generate_output_path(save_dir)
-        csv_list.append(f"{model.output_path}.csv")
         model.train(train_x, train_y)
         printc(f"{pemji('check_mark')} Training RF of parameters: random_state: {random_state}, max_depth: {max_depth}, max_features: {max_features}, n_estimators: {n_estimators}", 'g')
-        model.evaluate(val_x, val_y, current_timestamp)
+
+        # test evaluation
+        model.evaluate(test_x, test_y, current_timestamp)
+        csv_list.append(f"{model.test_output_path}.csv")
+
+        # val evaluation
+        model.evaluate(val_x, val_y, current_timestamp, is_test=False)
+        csv_list.append(f"{model.val_output_path}.csv")
+
         model.save()
-        model.save_tree_image(strain_labels, train_features, train_x, train_y)
+        # model.save_tree_image(strain_labels, train_features, train_x, train_y)
         printc(f"{pemji('download')} Saved RF of parameters: random_state: {random_state}, max_depth: {max_depth}, max_features: {max_features}, n_estimators: {n_estimators}; to: {save_dir}", 'g')
         
     merge_csv(csv_list, "rf")
@@ -140,7 +147,7 @@ def train_decision_tree(train_labels, train_features, save_dir, train_x, val_x, 
         model.save()
 
         # Save tree png
-        model.save_tree_image(train_labels, train_features, train_x, train_y)
+        # model.save_tree_image(train_labels, train_features, train_x, train_y)
         printc(f"{pemji('download')} Saved DF of parameters: random_state: {random_state}, max_depth: {max_depth}, max_features: {max_features}; to: {save_dir}", 'g')
         
     merge_csv(csv_list, "dt")
@@ -191,7 +198,7 @@ if __name__ == '__main__':
     current_timestamp = datetime.now().strftime('%Y-%m-%d-%H:%M')
 
     # train model(s)
-    train_logistic_regression(checkpoint_dir, train_x_np, val_x_np, test_x_np, train_y, val_y, test_y, current_timestamp)
+    # train_logistic_regression(checkpoint_dir, train_x_np, val_x_np, test_x_np, train_y, val_y, test_y, current_timestamp)
     # train_decision_tree(train_labels, train_features, checkpoint_dir, train_x_np, val_x_np, test_x_np, train_y, val_y, test_y, current_timestamp)
-    # train_random_forest(train_labels, train_features, checkpoint_dir, train_x_np, val_x_np, test_x_np, train_y, val_y, test_y, current_timestamp)
+    train_random_forest(train_labels, train_features, checkpoint_dir, train_x_np, val_x_np, test_x_np, train_y, val_y, test_y, current_timestamp)
     # train_knn(checkpoint_dir, train_x_np, val_x_np, test_x_np, train_y, val_y, test_y, current_timestamp)
