@@ -53,7 +53,7 @@ class RandomForestClassifierModel:
         
         # Extract the tree from the Random Forest
         tree = self.model.estimators_[tree_index]
-        filename = f"{self.val_output_path}.png"
+        filename = f"tree_{self.val_output_path}.png"
         
         # Export tree to Graphviz dot format
         dot_data = StringIO()

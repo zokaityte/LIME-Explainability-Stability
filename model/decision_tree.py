@@ -49,7 +49,7 @@ class DecisionTreeClassifierModel:
         - filename: The name of the file to save the tree image (default is 'tree.png').
         """
     
-        filename = f"{self.val_output_path}.png"
+        filename = f"tree_{self.val_output_path}.png"
 
         # Export tree to Graphviz dot format
         dot_data = StringIO()
