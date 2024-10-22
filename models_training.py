@@ -17,16 +17,15 @@ from datetime import datetime
 from common.generic import printc
 from common.generic import pemji
 
-
 DATA_DIR = 'data'
-DATASET_DIR = 'sample_dataset_1' # or smoldata/bigdata
+DATASET_DIR = 'big_data_zero_corr_enc'
 MODELS_DIR = 'model_checkpoints'
 
 
 def load_data(print_details=False, encode_labels=True):
-    train_data_path = os.path.join(DATA_DIR, DATASET_DIR, 'train_data.csv')
-    val_data_path = os.path.join(DATA_DIR, DATASET_DIR, 'val_data.csv')
-    test_data_path = os.path.join(DATA_DIR, DATASET_DIR, 'test_data.csv')
+    train_data_path = os.path.join(DATA_DIR, DATASET_DIR, 'train.csv')
+    val_data_path = os.path.join(DATA_DIR, DATASET_DIR, 'val.csv')
+    test_data_path = os.path.join(DATA_DIR, DATASET_DIR, 'test.csv')
 
     # Load dataset
     train_data = pd.read_csv(train_data_path, engine="pyarrow")
@@ -72,31 +71,37 @@ def merge_csv(csv_list, type):
 
 def train_random_forest(strain_labels, train_features, save_dir, train_x, val_x, test_x, train_y, val_y, test_y, current_timestamp):
     csv_list = []
-    for i in range(3,7):
-        n_estimators=i
-        random_state=i
-        max_depth=i
-        max_features=i
+    random_state = 42
+    n_estimators = [100, 200, 300]
+    max_depth = [None, 10, 20, 30]
+    min_samples_split = [2, 10, 20]
+    min_samples_leaf = [1, 5, 10]
+    max_features = ['sqrt', 'log2']
 
-        printc(f"{pemji('hourglass')} Training RF of parameters: random_state: {random_state}, max_depth: {max_depth}, max_features: {max_features}, n_estimators: {n_estimators}", 'b')
-        model = RandomForestClassifierModel(n_estimators=n_estimators, random_state=random_state, max_depth=max_depth, max_features=max_features, n_jobs=os.cpu_count())
+    for n in n_estimators:
+        for depth in max_depth:
+            for split in min_samples_split:
+                for leaf in min_samples_leaf:
+                    for feature in max_features:
+                        printc(f"{pemji('hourglass')} Training RF of parameters: n_estimators: {n}, max_depth: {depth}, min_samples_split: {split}, min_samples_leaf: {leaf} max_features: {feature}", 'b')
+                        model = RandomForestClassifierModel(n_estimators=n, random_state=random_state, min_samples_split=split, max_depth=depth, max_features=feature, n_jobs=os.cpu_count(), min_samples_leaf=leaf)
 
-        model.generate_output_path(save_dir)
-        model.train(train_x, train_y)
-        printc(f"{pemji('check_mark')} Training RF of parameters: random_state: {random_state}, max_depth: {max_depth}, max_features: {max_features}, n_estimators: {n_estimators}", 'g')
+                        model.generate_output_path(save_dir)
+                        model.train(train_x, train_y)
+                        printc(f"{pemji('check_mark')} Training RF of parameters: n_estimators: {n}, max_depth: {depth}, min_samples_split: {split}, min_samples_leaf: {leaf} max_features: {feature}", 'g')
 
-        # test evaluation
-        model.evaluate(test_x, test_y, current_timestamp)
-        csv_list.append(f"{model.test_output_path}.csv")
+                        # test evaluation
+                        model.evaluate(test_x, test_y, current_timestamp)
+                        csv_list.append(f"{model.test_output_path}.csv")
 
-        # val evaluation
-        model.evaluate(val_x, val_y, current_timestamp, is_test=False)
-        csv_list.append(f"{model.val_output_path}.csv")
+                        # val evaluation
+                        model.evaluate(val_x, val_y, current_timestamp, is_test=False)
+                        csv_list.append(f"{model.val_output_path}.csv")
 
-        model.save()
-        # model.save_tree_image(strain_labels, train_features, train_x, train_y)
-        printc(f"{pemji('download')} Saved RF of parameters: random_state: {random_state}, max_depth: {max_depth}, max_features: {max_features}, n_estimators: {n_estimators}; to: {save_dir}", 'g')
-        
+                        model.save()
+                        model.save_tree_image(strain_labels, train_features, train_x, train_y)
+                        printc(f"{pemji('download')} Saved RF of parameters: n_estimators: {n}, max_depth: {depth}, min_samples_split: {split}, min_samples_leaf: {leaf} max_features: {feature}", 'g')
+
     merge_csv(csv_list, "rf")
 
 
@@ -147,7 +152,7 @@ def train_decision_tree(train_labels, train_features, save_dir, train_x, val_x, 
         model.save()
 
         # Save tree png
-        # model.save_tree_image(train_labels, train_features, train_x, train_y)
+        model.save_tree_image(train_labels, train_features, train_x, train_y)
         printc(f"{pemji('download')} Saved DF of parameters: random_state: {random_state}, max_depth: {max_depth}, max_features: {max_features}; to: {save_dir}", 'g')
         
     merge_csv(csv_list, "dt")
@@ -193,8 +198,8 @@ if __name__ == '__main__':
         os.makedirs(checkpoint_dir)
 
     # loda data
-    train_labels, train_features, train_x_np, val_x_np, test_x_np, train_y, val_y, test_y = load_data(False, True)
-    
+    train_labels, train_features, train_x_np, val_x_np, test_x_np, train_y, val_y, test_y = load_data(False, False)
+
     current_timestamp = datetime.now().strftime('%Y-%m-%d-%H:%M')
 
     # train model(s)
