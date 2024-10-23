@@ -41,10 +41,6 @@ class ExperimentData:
         if random_seed is not None:
             random.seed(random_seed)
 
-        # Get the total number of rows (excluding the header)
-        with open(self._test_data_csv_path, 'r') as f:
-            row_count = sum(1 for _ in f) - 1  # Subtract 1 for the header row
-
         test_data = pd.read_csv(self._test_data_csv_path, engine="pyarrow", usecols=self._column_names[:-1])
         test_data.replace([np.inf, -np.inf], np.nan, inplace=True)
 
