@@ -41,19 +41,20 @@ class ExperimentData:
         if random_seed is not None:
             random.seed(random_seed)
 
-        # Get the total number of rows (excluding the header)
-        with open(self._test_data_csv_path, 'r') as f:
-            row_count = sum(1 for _ in f) - 1  # Subtract 1 for the header row
+        test_data = pd.read_csv(self._test_data_csv_path, engine="pyarrow", usecols=self._column_names[:-1])
+        test_data.replace([np.inf, -np.inf], np.nan, inplace=True)
 
-        # Select a random row index (between 1 and row_count, skipping the header)
-        random_row_index = random.randint(1, row_count)
+        # Impute NaNs with the mean
+        imputer = SimpleImputer(strategy='mean')
+        test_data_imputed = imputer.fit_transform(test_data)
+
+        # Select a random row
+        random_row_index = random.randint(1, test_data.shape[0] - 1)
+        random_row = test_data_imputed[random_row_index]
+
         self.random_text_row_index = random_row_index
 
-        # Read only the selected row (skip all rows except the randomly selected one)
-        random_row = pd.read_csv(self._test_data_csv_path, skiprows=range(1, random_row_index), nrows=1)
-        random_row_features = random_row.iloc[:, :-1]
-        random_row_features_numpy = random_row_features.to_numpy().flatten()
-        return random_row_features_numpy
+        return random_row
 
     def get_num_classes(self):
         return len(self._label_names)
