@@ -4,7 +4,7 @@
       "model_path": "pick yours",
       "dataset_path": "./data/big_data_zero_corr_enc",
       "label_names": ["BENIGN", "DDoS", "PortScan", "Bot", "Infiltration", "Web Attack � Brute Force", "Web Attack � XSS", "Web Attack � Sql Injection", "FTP-Patator", "SSH-Patator", "DoS slowloris", "DoS Slowhttptest", "DoS Hulk", "DoS GoldenEye", "Heartbleed", "DoS attacks-SlowHTTPTest", "DoS attacks-Hulk", "Brute Force -Web", "Brute Force -XSS", "SQL Injection", "DDoS attacks-LOIC-HTTP", "Infilteration", "DoS attacks-GoldenEye", "DoS attacks-Slowloris", "FTP-BruteForce", "SSH-Bruteforce", "DDOS attack-LOIC-UDP", "DDOS attack-HOIC"],
-      "categorical_columns_names": ["FIN Flag Count", "RST Flag Count", "PSH Flag Count", "ACK Flag Count", "URG Flag Count"],
+      "categorical_columns_names": ["Fwd PSH Flags", "Fwd URG Flags", "FIN Flag Count", "RST Flag Count", "PSH Flag Count", "ACK Flag Count", "URG Flag Count"],
       "explainer_config": {
         "kernel_width": null,
         "kernel": null,
@@ -21,7 +21,7 @@
       "model_path": "pick yours",
       "dataset_path": "./data/big_data_zero_corr_enc",
       "label_names": ["BENIGN", "DDoS", "PortScan", "Bot", "Infiltration", "Web Attack � Brute Force", "Web Attack � XSS", "Web Attack � Sql Injection", "FTP-Patator", "SSH-Patator", "DoS slowloris", "DoS Slowhttptest", "DoS Hulk", "DoS GoldenEye", "Heartbleed", "DoS attacks-SlowHTTPTest", "DoS attacks-Hulk", "Brute Force -Web", "Brute Force -XSS", "SQL Injection", "DDoS attacks-LOIC-HTTP", "Infilteration", "DoS attacks-GoldenEye", "DoS attacks-Slowloris", "FTP-BruteForce", "SSH-Bruteforce", "DDOS attack-LOIC-UDP", "DDOS attack-HOIC"],
-      "categorical_columns_names": ["FIN Flag Count", "RST Flag Count", "PSH Flag Count", "ACK Flag Count", "URG Flag Count"],
+      "categorical_columns_names": ["Fwd PSH Flags", "Fwd URG Flags", "FIN Flag Count", "RST Flag Count", "PSH Flag Count", "ACK Flag Count", "URG Flag Count"],
       "explainer_config": {
         "kernel_width": null,
         "kernel": null,
@@ -41,7 +41,7 @@
       "model_path": "pick yours",
       "dataset_path": "./data/big_data_zero_corr_enc",
       "label_names": ["BENIGN", "DDoS", "PortScan", "Bot", "Infiltration", "Web Attack � Brute Force", "Web Attack � XSS", "Web Attack � Sql Injection", "FTP-Patator", "SSH-Patator", "DoS slowloris", "DoS Slowhttptest", "DoS Hulk", "DoS GoldenEye", "Heartbleed", "DoS attacks-SlowHTTPTest", "DoS attacks-Hulk", "Brute Force -Web", "Brute Force -XSS", "SQL Injection", "DDoS attacks-LOIC-HTTP", "Infilteration", "DoS attacks-GoldenEye", "DoS attacks-Slowloris", "FTP-BruteForce", "SSH-Bruteforce", "DDOS attack-LOIC-UDP", "DDOS attack-HOIC"],
-      "categorical_columns_names": ["FIN Flag Count", "RST Flag Count", "PSH Flag Count", "ACK Flag Count", "URG Flag Count"],
+      "categorical_columns_names": ["Fwd PSH Flags", "Fwd URG Flags", "FIN Flag Count", "RST Flag Count", "PSH Flag Count", "ACK Flag Count", "URG Flag Count"],
       "explainer_config": {
         "kernel_width": null,
         "kernel": null,
@@ -61,7 +61,7 @@
       "model_path": "pick yours",
       "dataset_path": "./data/big_data_zero_corr_enc",
       "label_names": ["BENIGN", "DDoS", "PortScan", "Bot", "Infiltration", "Web Attack � Brute Force", "Web Attack � XSS", "Web Attack � Sql Injection", "FTP-Patator", "SSH-Patator", "DoS slowloris", "DoS Slowhttptest", "DoS Hulk", "DoS GoldenEye", "Heartbleed", "DoS attacks-SlowHTTPTest", "DoS attacks-Hulk", "Brute Force -Web", "Brute Force -XSS", "SQL Injection", "DDoS attacks-LOIC-HTTP", "Infilteration", "DoS attacks-GoldenEye", "DoS attacks-Slowloris", "FTP-BruteForce", "SSH-Bruteforce", "DDOS attack-LOIC-UDP", "DDOS attack-HOIC"],
-      "categorical_columns_names": ["FIN Flag Count", "RST Flag Count", "PSH Flag Count", "ACK Flag Count", "URG Flag Count"],
+      "categorical_columns_names": ["Fwd PSH Flags", "Fwd URG Flags", "FIN Flag Count", "RST Flag Count", "PSH Flag Count", "ACK Flag Count", "URG Flag Count"],
       "explainer_config": {
         "kernel_width": null,
         "kernel": null,
@@ -81,7 +81,7 @@
       "model_path": "pick yours",
       "dataset_path": "./data/big_data_zero_corr_enc",
       "label_names": ["BENIGN", "DDoS", "PortScan", "Bot", "Infiltration", "Web Attack � Brute Force", "Web Attack � XSS", "Web Attack � Sql Injection", "FTP-Patator", "SSH-Patator", "DoS slowloris", "DoS Slowhttptest", "DoS Hulk", "DoS GoldenEye", "Heartbleed", "DoS attacks-SlowHTTPTest", "DoS attacks-Hulk", "Brute Force -Web", "Brute Force -XSS", "SQL Injection", "DDoS attacks-LOIC-HTTP", "Infilteration", "DoS attacks-GoldenEye", "DoS attacks-Slowloris", "FTP-BruteForce", "SSH-Bruteforce", "DDOS attack-LOIC-UDP", "DDOS attack-HOIC"],
-      "categorical_columns_names": ["FIN Flag Count", "RST Flag Count", "PSH Flag Count", "ACK Flag Count", "URG Flag Count"],
+      "categorical_columns_names": ["Fwd PSH Flags", "Fwd URG Flags", "FIN Flag Count", "RST Flag Count", "PSH Flag Count", "ACK Flag Count", "URG Flag Count"],
       "explainer_config": {
         "kernel_width": null,
         "kernel": null,
@@ -100,7 +100,7 @@
       "model_path": "pick yours",
       "dataset_path": "./data/big_data_zero_corr_enc",
       "label_names": ["BENIGN", "DDoS", "PortScan", "Bot", "Infiltration", "Web Attack � Brute Force", "Web Attack � XSS", "Web Attack � Sql Injection", "FTP-Patator", "SSH-Patator", "DoS slowloris", "DoS Slowhttptest", "DoS Hulk", "DoS GoldenEye", "Heartbleed", "DoS attacks-SlowHTTPTest", "DoS attacks-Hulk", "Brute Force -Web", "Brute Force -XSS", "SQL Injection", "DDoS attacks-LOIC-HTTP", "Infilteration", "DoS attacks-GoldenEye", "DoS attacks-Slowloris", "FTP-BruteForce", "SSH-Bruteforce", "DDOS attack-LOIC-UDP", "DDOS attack-HOIC"],
-      "categorical_columns_names": ["FIN Flag Count", "RST Flag Count", "PSH Flag Count", "ACK Flag Count", "URG Flag Count"],
+      "categorical_columns_names": ["Fwd PSH Flags", "Fwd URG Flags", "FIN Flag Count", "RST Flag Count", "PSH Flag Count", "ACK Flag Count", "URG Flag Count"],
       "explainer_config": {
         "kernel_width": null,
         "kernel": null,
@@ -119,7 +119,7 @@
       "model_path": "pick yours",
       "dataset_path": "./data/big_data_zero_corr_enc",
       "label_names": ["BENIGN", "DDoS", "PortScan", "Bot", "Infiltration", "Web Attack � Brute Force", "Web Attack � XSS", "Web Attack � Sql Injection", "FTP-Patator", "SSH-Patator", "DoS slowloris", "DoS Slowhttptest", "DoS Hulk", "DoS GoldenEye", "Heartbleed", "DoS attacks-SlowHTTPTest", "DoS attacks-Hulk", "Brute Force -Web", "Brute Force -XSS", "SQL Injection", "DDoS attacks-LOIC-HTTP", "Infilteration", "DoS attacks-GoldenEye", "DoS attacks-Slowloris", "FTP-BruteForce", "SSH-Bruteforce", "DDOS attack-LOIC-UDP", "DDOS attack-HOIC"],
-      "categorical_columns_names": ["FIN Flag Count", "RST Flag Count", "PSH Flag Count", "ACK Flag Count", "URG Flag Count"],
+      "categorical_columns_names": ["Fwd PSH Flags", "Fwd URG Flags", "FIN Flag Count", "RST Flag Count", "PSH Flag Count", "ACK Flag Count", "URG Flag Count"],
       "explainer_config": {
         "kernel_width": null,
         "kernel": null,
@@ -138,7 +138,7 @@
       "model_path": "pick yours",
       "dataset_path": "./data/big_data_zero_corr_enc",
       "label_names": ["BENIGN", "DDoS", "PortScan", "Bot", "Infiltration", "Web Attack � Brute Force", "Web Attack � XSS", "Web Attack � Sql Injection", "FTP-Patator", "SSH-Patator", "DoS slowloris", "DoS Slowhttptest", "DoS Hulk", "DoS GoldenEye", "Heartbleed", "DoS attacks-SlowHTTPTest", "DoS attacks-Hulk", "Brute Force -Web", "Brute Force -XSS", "SQL Injection", "DDoS attacks-LOIC-HTTP", "Infilteration", "DoS attacks-GoldenEye", "DoS attacks-Slowloris", "FTP-BruteForce", "SSH-Bruteforce", "DDOS attack-LOIC-UDP", "DDOS attack-HOIC"],
-      "categorical_columns_names": ["FIN Flag Count", "RST Flag Count", "PSH Flag Count", "ACK Flag Count", "URG Flag Count"],
+      "categorical_columns_names": ["Fwd PSH Flags", "Fwd URG Flags", "FIN Flag Count", "RST Flag Count", "PSH Flag Count", "ACK Flag Count", "URG Flag Count"],
       "explainer_config": {
         "kernel_width": null,
         "kernel": null,
@@ -157,7 +157,7 @@
       "model_path": "pick yours",
       "dataset_path": "./data/big_data_zero_corr_enc",
       "label_names": ["BENIGN", "DDoS", "PortScan", "Bot", "Infiltration", "Web Attack � Brute Force", "Web Attack � XSS", "Web Attack � Sql Injection", "FTP-Patator", "SSH-Patator", "DoS slowloris", "DoS Slowhttptest", "DoS Hulk", "DoS GoldenEye", "Heartbleed", "DoS attacks-SlowHTTPTest", "DoS attacks-Hulk", "Brute Force -Web", "Brute Force -XSS", "SQL Injection", "DDoS attacks-LOIC-HTTP", "Infilteration", "DoS attacks-GoldenEye", "DoS attacks-Slowloris", "FTP-BruteForce", "SSH-Bruteforce", "DDOS attack-LOIC-UDP", "DDOS attack-HOIC"],
-      "categorical_columns_names": ["FIN Flag Count", "RST Flag Count", "PSH Flag Count", "ACK Flag Count", "URG Flag Count"],
+      "categorical_columns_names": ["Fwd PSH Flags", "Fwd URG Flags", "FIN Flag Count", "RST Flag Count", "PSH Flag Count", "ACK Flag Count", "URG Flag Count"],
       "explainer_config": {
         "kernel_width": null,
         "kernel": null,
@@ -176,7 +176,7 @@
       "model_path": "pick yours",
       "dataset_path": "./data/big_data_zero_corr_enc",
       "label_names": ["BENIGN", "DDoS", "PortScan", "Bot", "Infiltration", "Web Attack � Brute Force", "Web Attack � XSS", "Web Attack � Sql Injection", "FTP-Patator", "SSH-Patator", "DoS slowloris", "DoS Slowhttptest", "DoS Hulk", "DoS GoldenEye", "Heartbleed", "DoS attacks-SlowHTTPTest", "DoS attacks-Hulk", "Brute Force -Web", "Brute Force -XSS", "SQL Injection", "DDoS attacks-LOIC-HTTP", "Infilteration", "DoS attacks-GoldenEye", "DoS attacks-Slowloris", "FTP-BruteForce", "SSH-Bruteforce", "DDOS attack-LOIC-UDP", "DDOS attack-HOIC"],
-      "categorical_columns_names": ["FIN Flag Count", "RST Flag Count", "PSH Flag Count", "ACK Flag Count", "URG Flag Count"],
+      "categorical_columns_names": ["Fwd PSH Flags", "Fwd URG Flags", "FIN Flag Count", "RST Flag Count", "PSH Flag Count", "ACK Flag Count", "URG Flag Count"],
       "explainer_config": {
         "kernel_width": null,
         "kernel": null,
@@ -195,7 +195,7 @@
       "model_path": "pick yours",
       "dataset_path": "./data/big_data_zero_corr_enc",
       "label_names": ["BENIGN", "DDoS", "PortScan", "Bot", "Infiltration", "Web Attack � Brute Force", "Web Attack � XSS", "Web Attack � Sql Injection", "FTP-Patator", "SSH-Patator", "DoS slowloris", "DoS Slowhttptest", "DoS Hulk", "DoS GoldenEye", "Heartbleed", "DoS attacks-SlowHTTPTest", "DoS attacks-Hulk", "Brute Force -Web", "Brute Force -XSS", "SQL Injection", "DDoS attacks-LOIC-HTTP", "Infilteration", "DoS attacks-GoldenEye", "DoS attacks-Slowloris", "FTP-BruteForce", "SSH-Bruteforce", "DDOS attack-LOIC-UDP", "DDOS attack-HOIC"],
-      "categorical_columns_names": ["FIN Flag Count", "RST Flag Count", "PSH Flag Count", "ACK Flag Count", "URG Flag Count"],
+      "categorical_columns_names": ["Fwd PSH Flags", "Fwd URG Flags", "FIN Flag Count", "RST Flag Count", "PSH Flag Count", "ACK Flag Count", "URG Flag Count"],
       "explainer_config": {
         "kernel_width": null,
         "kernel": null,
@@ -214,7 +214,7 @@
       "model_path": "pick yours",
       "dataset_path": "./data/big_data_zero_corr_enc",
       "label_names": ["BENIGN", "DDoS", "PortScan", "Bot", "Infiltration", "Web Attack � Brute Force", "Web Attack � XSS", "Web Attack � Sql Injection", "FTP-Patator", "SSH-Patator", "DoS slowloris", "DoS Slowhttptest", "DoS Hulk", "DoS GoldenEye", "Heartbleed", "DoS attacks-SlowHTTPTest", "DoS attacks-Hulk", "Brute Force -Web", "Brute Force -XSS", "SQL Injection", "DDoS attacks-LOIC-HTTP", "Infilteration", "DoS attacks-GoldenEye", "DoS attacks-Slowloris", "FTP-BruteForce", "SSH-Bruteforce", "DDOS attack-LOIC-UDP", "DDOS attack-HOIC"],
-      "categorical_columns_names": ["FIN Flag Count", "RST Flag Count", "PSH Flag Count", "ACK Flag Count", "URG Flag Count"],
+      "categorical_columns_names": ["Fwd PSH Flags", "Fwd URG Flags", "FIN Flag Count", "RST Flag Count", "PSH Flag Count", "ACK Flag Count", "URG Flag Count"],
       "explainer_config": {
         "kernel_width": null,
         "kernel": null,
@@ -233,7 +233,7 @@
       "model_path": "pick yours",
       "dataset_path": "./data/big_data_zero_corr_enc",
       "label_names": ["BENIGN", "DDoS", "PortScan", "Bot", "Infiltration", "Web Attack � Brute Force", "Web Attack � XSS", "Web Attack � Sql Injection", "FTP-Patator", "SSH-Patator", "DoS slowloris", "DoS Slowhttptest", "DoS Hulk", "DoS GoldenEye", "Heartbleed", "DoS attacks-SlowHTTPTest", "DoS attacks-Hulk", "Brute Force -Web", "Brute Force -XSS", "SQL Injection", "DDoS attacks-LOIC-HTTP", "Infilteration", "DoS attacks-GoldenEye", "DoS attacks-Slowloris", "FTP-BruteForce", "SSH-Bruteforce", "DDOS attack-LOIC-UDP", "DDOS attack-HOIC"],
-      "categorical_columns_names": ["FIN Flag Count", "RST Flag Count", "PSH Flag Count", "ACK Flag Count", "URG Flag Count"],
+      "categorical_columns_names": ["Fwd PSH Flags", "Fwd URG Flags", "FIN Flag Count", "RST Flag Count", "PSH Flag Count", "ACK Flag Count", "URG Flag Count"],
       "explainer_config": {
         "kernel_width": null,
         "kernel": null,
@@ -252,7 +252,7 @@
       "model_path": "pick yours",
       "dataset_path": "./data/big_data_zero_corr_enc",
       "label_names": ["BENIGN", "DDoS", "PortScan", "Bot", "Infiltration", "Web Attack � Brute Force", "Web Attack � XSS", "Web Attack � Sql Injection", "FTP-Patator", "SSH-Patator", "DoS slowloris", "DoS Slowhttptest", "DoS Hulk", "DoS GoldenEye", "Heartbleed", "DoS attacks-SlowHTTPTest", "DoS attacks-Hulk", "Brute Force -Web", "Brute Force -XSS", "SQL Injection", "DDoS attacks-LOIC-HTTP", "Infilteration", "DoS attacks-GoldenEye", "DoS attacks-Slowloris", "FTP-BruteForce", "SSH-Bruteforce", "DDOS attack-LOIC-UDP", "DDOS attack-HOIC"],
-      "categorical_columns_names": ["FIN Flag Count", "RST Flag Count", "PSH Flag Count", "ACK Flag Count", "URG Flag Count"],
+      "categorical_columns_names": ["Fwd PSH Flags", "Fwd URG Flags", "FIN Flag Count", "RST Flag Count", "PSH Flag Count", "ACK Flag Count", "URG Flag Count"],
       "explainer_config": {
         "kernel_width": null,
         "kernel": null,
@@ -271,7 +271,7 @@
       "model_path": "pick yours",
       "dataset_path": "./data/big_data_zero_corr_enc",
       "label_names": ["BENIGN", "DDoS", "PortScan", "Bot", "Infiltration", "Web Attack � Brute Force", "Web Attack � XSS", "Web Attack � Sql Injection", "FTP-Patator", "SSH-Patator", "DoS slowloris", "DoS Slowhttptest", "DoS Hulk", "DoS GoldenEye", "Heartbleed", "DoS attacks-SlowHTTPTest", "DoS attacks-Hulk", "Brute Force -Web", "Brute Force -XSS", "SQL Injection", "DDoS attacks-LOIC-HTTP", "Infilteration", "DoS attacks-GoldenEye", "DoS attacks-Slowloris", "FTP-BruteForce", "SSH-Bruteforce", "DDOS attack-LOIC-UDP", "DDOS attack-HOIC"],
-      "categorical_columns_names": ["FIN Flag Count", "RST Flag Count", "PSH Flag Count", "ACK Flag Count", "URG Flag Count"],
+      "categorical_columns_names": ["Fwd PSH Flags", "Fwd URG Flags", "FIN Flag Count", "RST Flag Count", "PSH Flag Count", "ACK Flag Count", "URG Flag Count"],
       "explainer_config": {
         "kernel_width": null,
         "kernel": null,
@@ -290,7 +290,7 @@
       "model_path": "pick yours",
       "dataset_path": "./data/big_data_zero_corr_enc",
       "label_names": ["BENIGN", "DDoS", "PortScan", "Bot", "Infiltration", "Web Attack � Brute Force", "Web Attack � XSS", "Web Attack � Sql Injection", "FTP-Patator", "SSH-Patator", "DoS slowloris", "DoS Slowhttptest", "DoS Hulk", "DoS GoldenEye", "Heartbleed", "DoS attacks-SlowHTTPTest", "DoS attacks-Hulk", "Brute Force -Web", "Brute Force -XSS", "SQL Injection", "DDoS attacks-LOIC-HTTP", "Infilteration", "DoS attacks-GoldenEye", "DoS attacks-Slowloris", "FTP-BruteForce", "SSH-Bruteforce", "DDOS attack-LOIC-UDP", "DDOS attack-HOIC"],
-      "categorical_columns_names": ["FIN Flag Count", "RST Flag Count", "PSH Flag Count", "ACK Flag Count", "URG Flag Count"],
+      "categorical_columns_names": ["Fwd PSH Flags", "Fwd URG Flags", "FIN Flag Count", "RST Flag Count", "PSH Flag Count", "ACK Flag Count", "URG Flag Count"],
       "explainer_config": {
         "kernel_width": null,
         "kernel": null,
@@ -309,7 +309,7 @@
       "model_path": "pick yours",
       "dataset_path": "./data/big_data_zero_corr_enc",
       "label_names": ["BENIGN", "DDoS", "PortScan", "Bot", "Infiltration", "Web Attack � Brute Force", "Web Attack � XSS", "Web Attack � Sql Injection", "FTP-Patator", "SSH-Patator", "DoS slowloris", "DoS Slowhttptest", "DoS Hulk", "DoS GoldenEye", "Heartbleed", "DoS attacks-SlowHTTPTest", "DoS attacks-Hulk", "Brute Force -Web", "Brute Force -XSS", "SQL Injection", "DDoS attacks-LOIC-HTTP", "Infilteration", "DoS attacks-GoldenEye", "DoS attacks-Slowloris", "FTP-BruteForce", "SSH-Bruteforce", "DDOS attack-LOIC-UDP", "DDOS attack-HOIC"],
-      "categorical_columns_names": ["FIN Flag Count", "RST Flag Count", "PSH Flag Count", "ACK Flag Count", "URG Flag Count"],
+      "categorical_columns_names": ["Fwd PSH Flags", "Fwd URG Flags", "FIN Flag Count", "RST Flag Count", "PSH Flag Count", "ACK Flag Count", "URG Flag Count"],
       "explainer_config": {
         "kernel_width": null,
         "kernel": null,
