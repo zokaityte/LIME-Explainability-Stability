@@ -20,6 +20,9 @@ class ExperimentData:
         self._column_names = self._get_column_names()
         self.random_text_row_index = None
 
+        self._categorical_features = None
+        self._categorical_names = None
+
     def get_training_data(self):
         # TODO Check if validation split is needed
 
@@ -65,6 +68,8 @@ class ExperimentData:
 
     def get_categorical_features(self):
         """Returns the indexes of categorical columns based on the column names."""
+        if self._categorical_features:
+            return self._categorical_features
 
         df = pd.read_csv(self._train_data_csv_path, nrows=0)
 
@@ -73,26 +78,29 @@ class ExperimentData:
             if col_name in df.columns:
                 indexes.append(df.columns.get_loc(col_name))
 
-        return indexes
+        self._categorical_features = indexes
+        return self._categorical_features
 
     def get_categorical_names(self):
         """Returns a dictionary with the index of categorical columns and their unique values from all files."""
+        if self._categorical_names:
+            return self._categorical_names
+
         files = [self._train_data_csv_path, self._val_data_csv_path, self._test_data_csv_path]
-        df_header = pd.read_csv(self._train_data_csv_path, nrows=0)
-        categorical_dict = {}
+        categorical_dict = {col: set() for col in self._categorical_columns_names}
 
         for file_path in files:
-            chunk_size = CHUNK_SIZE
-            for chunk in pd.read_csv(file_path, usecols=self._categorical_columns_names, chunksize=chunk_size):
+            for chunk in pd.read_csv(file_path, usecols=self._categorical_columns_names, chunksize=CHUNK_SIZE):
                 for col_name in self._categorical_columns_names:
-                    col_index = df_header.columns.get_loc(col_name)
-                    if col_index not in categorical_dict:
-                        categorical_dict[col_index] = set(chunk[col_name].dropna().unique())
-                    else:
-                        categorical_dict[col_index].update(chunk[col_name].dropna().unique())
+                    categorical_dict[col_name].update(chunk[col_name].dropna().unique())
 
-        categorical_dict = {index: list(values) for index, values in categorical_dict.items()}
-        return categorical_dict
+        # Convert sets to lists and use column indices
+        df_header = pd.read_csv(self._train_data_csv_path, nrows=0)
+        categorical_dict = {df_header.columns.get_loc(col): list(values) for col, values in categorical_dict.items()}
+
+        self._categorical_names = categorical_dict
+
+        return self._categorical_names
 
     def _get_column_names(self):
         df_header_1 = pd.read_csv(self._train_data_csv_path, nrows=0)
