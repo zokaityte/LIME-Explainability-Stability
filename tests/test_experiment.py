@@ -49,7 +49,7 @@ class TestLimeExperiment(unittest.TestCase):
         experiment.run()
 
         # Expected explanation for the first class
-        expected_explanation = [('ACK Flag Cnt=0', 0.06637493923858132),
+        expected_explanation = [('ACK Flag Cnt=0.0', 0.06637493923858132),
                                 ('Flow Pkts/s', 0.03886579142502093),
                                 ('Init Fwd Win Byts', 0.023605242420647873),
                                 ('Subflow Fwd Pkts', -0.023575766513791962),

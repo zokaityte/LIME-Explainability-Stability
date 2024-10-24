@@ -68,7 +68,6 @@ class LimeExperiment:
             mode=mode,
             feature_names=experiment_data.get_feature_names(),
             categorical_features=experiment_data.get_categorical_features(),
-            categorical_names=experiment_data.get_categorical_names(),
             class_names=experiment_data.get_class_names(),
             random_state=experiment_random_state,
             kernel_width=explainer_config.kernel_width,

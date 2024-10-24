@@ -81,27 +81,6 @@ class ExperimentData:
         self._categorical_features = indexes
         return self._categorical_features
 
-    def get_categorical_names(self):
-        """Returns a dictionary with the index of categorical columns and their unique values from all files."""
-        if self._categorical_names:
-            return self._categorical_names
-
-        files = [self._train_data_csv_path, self._val_data_csv_path, self._test_data_csv_path]
-        categorical_dict = {col: set() for col in self._categorical_columns_names}
-
-        for file_path in files:
-            for chunk in pd.read_csv(file_path, usecols=self._categorical_columns_names, chunksize=CHUNK_SIZE):
-                for col_name in self._categorical_columns_names:
-                    categorical_dict[col_name].update(chunk[col_name].dropna().unique())
-
-        # Convert sets to lists and use column indices
-        df_header = pd.read_csv(self._train_data_csv_path, nrows=0)
-        categorical_dict = {df_header.columns.get_loc(col): list(values) for col, values in categorical_dict.items()}
-
-        self._categorical_names = categorical_dict
-
-        return self._categorical_names
-
     def _get_column_names(self):
         df_header_1 = pd.read_csv(self._train_data_csv_path, nrows=0)
         df_header_2 = pd.read_csv(self._val_data_csv_path, nrows=0)
