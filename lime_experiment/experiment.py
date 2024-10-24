@@ -13,6 +13,8 @@ from lime.explanation import Explanation
 from lime.lime_tabular import LimeTabularExplainer
 from lime.metrics import calculate_stability
 
+from common.generic import printc, pemji
+
 RESULTS_OUTPUT_DIR = "./_experiment_results"
 RESULTS_FILE_NAME = "experiment_results.csv"
 
@@ -31,25 +33,33 @@ class LimeExperiment:
     def run(self):
 
         if self._end_time is not None:
-            print("Experiment has already been run.")
+            printc(f"{pemji('warning')} Experiment has already been run.", "r")
             return
 
-        print(f"Experiment started at {datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3]} UTC")
-        self._start_time = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3] + 'Z'
+        printc(
+            f"{pemji('rocket')} Experiment started at {datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3]} UTC",
+            "b")
+        self._start_time = datetime.now(timezone.utc)
 
-        print("Running the experiment...")
+        printc(f"{pemji('gear')} Running the experiment...", "p")
         self._explanations = self._run_experiment(self._config.random_seed, self._config.experiment_data,
                                                   self._config.explainer_config, self._config.times_to_run,
                                                   self._config.explained_model, self._config.mode)
 
-        print("Experiment run complete. Starting evaluation of explanations...")
+        printc(f"{pemji('check_mark')} Experiment run complete. Starting evaluation of explanations...", "g")
         self._evaluation_results = self._evaluate_explanations(self._explanations)
 
-        self._end_time = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3] + 'Z'
-        print(f"Experiment completed at {self._end_time} UTC")
+        self._end_time = datetime.now(timezone.utc)
+        printc(
+            f"{pemji('check_mark')} Experiment completed at {self._end_time.strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3]} UTC",
+            "g")
+
+        # Calculate duration
+        duration = self._end_time - self._start_time
+        printc(f"{pemji('hourglass')} Experiment duration: {str(duration)}", "b")
 
         if self._config.save_results:
-            print("Saving results...")
+            printc(f"{pemji('floppy_disk')} Saving results...", "y")
             self._save_results()
 
     @staticmethod
@@ -68,7 +78,6 @@ class LimeExperiment:
             mode=mode,
             feature_names=experiment_data.get_feature_names(),
             categorical_features=experiment_data.get_categorical_features(),
-            categorical_names=experiment_data.get_categorical_names(),
             class_names=experiment_data.get_class_names(),
             random_state=experiment_random_state,
             kernel_width=explainer_config.kernel_width,

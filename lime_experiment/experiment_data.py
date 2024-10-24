@@ -20,6 +20,9 @@ class ExperimentData:
         self._column_names = self._get_column_names()
         self.random_text_row_index = None
 
+        self._categorical_features = None
+        self._categorical_names = None
+
     def get_training_data(self):
         # TODO Check if validation split is needed
 
@@ -41,20 +44,21 @@ class ExperimentData:
         if random_seed is not None:
             random.seed(random_seed)
 
-        test_data = pd.read_csv(self._test_data_csv_path, engine="pyarrow", usecols=self._column_names[:-1])
+        test_data = pd.read_csv(self._test_data_csv_path, engine="pyarrow")
         test_data.replace([np.inf, -np.inf], np.nan, inplace=True)
 
         # Impute NaNs with the mean
         imputer = SimpleImputer(strategy='mean')
         test_data_imputed = imputer.fit_transform(test_data)
 
-        # Select a random row
-        random_row_index = random.randint(1, test_data.shape[0] - 1)
-        random_row = test_data_imputed[random_row_index]
-
+        # Select a random row index
+        random_row_index = random.randint(0, test_data.shape[0])
         self.random_text_row_index = random_row_index
 
-        return random_row
+        # Select the features of the random row
+        random_row_features = test_data_imputed[random_row_index, :-1].reshape(1, -1).flatten()
+
+        return random_row_features
 
     def get_num_classes(self):
         return len(self._label_names)
@@ -64,6 +68,8 @@ class ExperimentData:
 
     def get_categorical_features(self):
         """Returns the indexes of categorical columns based on the column names."""
+        if self._categorical_features:
+            return self._categorical_features
 
         df = pd.read_csv(self._train_data_csv_path, nrows=0)
 
@@ -72,26 +78,8 @@ class ExperimentData:
             if col_name in df.columns:
                 indexes.append(df.columns.get_loc(col_name))
 
-        return indexes
-
-    def get_categorical_names(self):
-        """Returns a dictionary with the index of categorical columns and their unique values from all files."""
-        files = [self._train_data_csv_path, self._val_data_csv_path, self._test_data_csv_path]
-        df_header = pd.read_csv(self._train_data_csv_path, nrows=0)
-        categorical_dict = {}
-
-        for file_path in files:
-            chunk_size = CHUNK_SIZE
-            for chunk in pd.read_csv(file_path, usecols=self._categorical_columns_names, chunksize=chunk_size):
-                for col_name in self._categorical_columns_names:
-                    col_index = df_header.columns.get_loc(col_name)
-                    if col_index not in categorical_dict:
-                        categorical_dict[col_index] = set(chunk[col_name].dropna().unique())
-                    else:
-                        categorical_dict[col_index].update(chunk[col_name].dropna().unique())
-
-        categorical_dict = {index: list(values) for index, values in categorical_dict.items()}
-        return categorical_dict
+        self._categorical_features = indexes
+        return self._categorical_features
 
     def _get_column_names(self):
         df_header_1 = pd.read_csv(self._train_data_csv_path, nrows=0)
