@@ -17,7 +17,7 @@ pip install -r requirements.txt
 3. Adjust experiments config in `experiments_config.json` or generate new one with: `-generate_experiments_config.py` script.
 4. Run experiment with:
 `python main.py`
-5. Results will be saved in `_results` folder. It contains csv file with results for each experiment and folders for each experiment with plots.
+5. Results will be saved in `_experiment_results` folder. It contains csv file with results for each experiment and folders for each experiment with plots.
 
 Sample `experiments_config.json`:
 ```json
