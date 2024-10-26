@@ -51,7 +51,7 @@ class LimeExperimentConfig:
         configuration_records_dict = {
             "times_explained": self.times_to_run,
             "random_seed": self.random_seed,
-            "dataset": self.experiment_data.get_dataset_path(),
+            "dataset": self.experiment_data.get_dataset_name(),
             "number_of_features": self.experiment_data.get_feature_count(),
             "number_of_categorical_features": self.experiment_data.get_categorical_features_count(),
             "categorical_features": self.experiment_data.get_categorical_features_names(),

@@ -110,5 +110,5 @@ class ExperimentData:
     def get_feature_count(self):
         return len(self.get_feature_names())
 
-    def get_dataset_path(self):
-        return self._dataset_path
+    def get_dataset_name(self):
+        return os.path.basename(self._dataset_path)

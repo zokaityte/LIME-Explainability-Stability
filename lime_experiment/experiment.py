@@ -28,7 +28,7 @@ class LimeExperiment:
         self._evaluation_results = None
         self._start_time = None
         self._end_time = None
-        self._experiment_id = generate_short_uuid()
+        self._experiment_id = self.generate_experiment_id()
 
     def run(self):
 
@@ -198,3 +198,8 @@ class LimeExperiment:
                     explanation.as_pyplot_figure(label).savefig(
                         os.path.join(experiment_path, f"explanation_{i}_{label}.png"))
                     plt.close()
+
+    def generate_experiment_id(self):
+        return "_".join(["exp", self._config.explained_model.model_type,
+            self._config.explainer_config.sampling_func,
+            generate_short_uuid()])
