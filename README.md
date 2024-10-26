@@ -14,7 +14,7 @@ pip install -r requirements.txt
 
 1. Add datasets to `datasets` folder, containing `train_data.csv`, `val_data.csv` and `test_data.csv` files.
 2. Add trained scikit-learn classifier models to `models` folder, containing `.pkl` file, trained on dataset.
-3. Adjust experiments config in `experiments_config.json`.
+3. Adjust experiments config in `experiments_config.json` or generate new one with: `-generate_experiments_config.py` script.
 4. Run experiment with:
 `python main.py`
 5. Results will be saved in `_results` folder. It contains csv file with results for each experiment and folders for each experiment with plots.
