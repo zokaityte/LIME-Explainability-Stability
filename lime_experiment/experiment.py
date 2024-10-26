@@ -44,7 +44,8 @@ class LimeExperiment:
         printc(f"{pemji('gear')} Running the experiment...", "p")
         self._explanations = self._run_experiment(self._config.random_seed, self._config.experiment_data,
                                                   self._config.explainer_config, self._config.times_to_run,
-                                                  self._config.explained_model, self._config.mode)
+                                                  self._config.explained_model, self._config.mode,
+                                                  self._config.class_label_to_test)
 
         printc(f"{pemji('check_mark')} Experiment run complete. Starting evaluation of explanations...", "g")
         self._evaluation_results = self._evaluate_explanations(self._explanations)

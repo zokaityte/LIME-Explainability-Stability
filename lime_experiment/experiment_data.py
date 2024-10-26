@@ -5,8 +5,6 @@ from sklearn.impute import SimpleImputer
 
 import pandas as pd
 
-CHUNK_SIZE = 10000
-
 
 class ExperimentData:
 
@@ -18,7 +16,8 @@ class ExperimentData:
         self._label_names = label_names
         self._categorical_columns_names = categorical_columns_names if categorical_columns_names else []
         self._column_names = self._get_column_names()
-        self.random_text_row_index = None
+        self.random_test_row_index = None
+        self.random_test_row_label = None
 
         self._categorical_features = None
         self._categorical_names = None
