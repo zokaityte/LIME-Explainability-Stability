@@ -1,8 +1,9 @@
+import copy
 import json
 
 # Define the common configuration for each experiment
 base_experiment = {
-    "model_path": "pick yours",  # Default model path
+    "model_path": "model_checkpoints/random_state_42min_samples_split_2max_depth_30min_samples_leaf_1max_features_sqrt_val.pkl",  # Default model path
     "dataset_path": "./data/big_data_zero_corr_enc",
     "label_names": ["BENIGN", "DDoS", "PortScan", "Bot", "Infiltration", "Web Attack � Brute Force", "Web Attack � XSS",
                     "Web Attack � Sql Injection", "FTP-Patator", "SSH-Patator", "DoS slowloris", "DoS Slowhttptest",
@@ -49,7 +50,7 @@ class_labels = [0, 17, 20]
 experiments = []
 for config in sampling_configs:
     for label in class_labels:
-        experiment = base_experiment.copy()
+        experiment = copy.deepcopy(base_experiment)
         experiment["class_label_to_explain"] = label
         experiment["explainer_config"]["sampling_func"] = config["sampling_func"]
         experiment["explainer_config"]["sampling_func_params"] = config["sampling_func_params"]
