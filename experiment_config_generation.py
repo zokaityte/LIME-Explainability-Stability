@@ -43,7 +43,7 @@ sampling_configs = [
 ]
 
 # Define the list of class labels to explain for each experiment
-class_labels = [0]
+class_labels = [0, 17, 20]
 
 # Create the list of experiments
 experiments = []
