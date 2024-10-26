@@ -1,309 +1,745 @@
 {
-  "experiments": [
-    {
-      "model_path": "model_checkpoints/random_state_42min_samples_split_2max_depth_30min_samples_leaf_1max_features_sqrt_val.pkl",
-      "dataset_path": "./data/big_data_zero_corr_enc",
-      "label_names": ["BENIGN", "DDoS", "PortScan", "Bot", "Infiltration", "Web Attack � Brute Force", "Web Attack � XSS", "Web Attack � Sql Injection", "FTP-Patator", "SSH-Patator", "DoS slowloris", "DoS Slowhttptest", "DoS Hulk", "DoS GoldenEye", "Heartbleed", "DoS attacks-SlowHTTPTest", "DoS attacks-Hulk", "Brute Force -Web", "Brute Force -XSS", "SQL Injection", "DDoS attacks-LOIC-HTTP", "Infilteration", "DoS attacks-GoldenEye", "DoS attacks-Slowloris", "FTP-BruteForce", "SSH-Bruteforce", "DDOS attack-LOIC-UDP", "DDOS attack-HOIC"],
-      "categorical_columns_names": ["Fwd PSH Flags", "Fwd URG Flags", "FIN Flag Count", "RST Flag Count", "PSH Flag Count", "ACK Flag Count", "URG Flag Count"],
-      "class_label_to_explain": 0,
-      "explainer_config": {
-        "kernel_width": null,
-        "kernel": null,
-        "sample_around_instance": false,
-        "num_features": 10,
-        "num_samples": 5000,
-        "sampling_func": "gaussian",
-        "sampling_func_params": {}
-      },
-      "times_to_run": 30,
-      "random_seed": null
-    },
-    {
-      "model_path": "model_checkpoints/random_state_42min_samples_split_2max_depth_30min_samples_leaf_1max_features_sqrt_val.pkl",
-      "dataset_path": "./data/big_data_zero_corr_enc",
-      "label_names": ["BENIGN", "DDoS", "PortScan", "Bot", "Infiltration", "Web Attack � Brute Force", "Web Attack � XSS", "Web Attack � Sql Injection", "FTP-Patator", "SSH-Patator", "DoS slowloris", "DoS Slowhttptest", "DoS Hulk", "DoS GoldenEye", "Heartbleed", "DoS attacks-SlowHTTPTest", "DoS attacks-Hulk", "Brute Force -Web", "Brute Force -XSS", "SQL Injection", "DDoS attacks-LOIC-HTTP", "Infilteration", "DoS attacks-GoldenEye", "DoS attacks-Slowloris", "FTP-BruteForce", "SSH-Bruteforce", "DDOS attack-LOIC-UDP", "DDOS attack-HOIC"],
-      "categorical_columns_names": ["Fwd PSH Flags", "Fwd URG Flags", "FIN Flag Count", "RST Flag Count", "PSH Flag Count", "ACK Flag Count", "URG Flag Count"],
-      "explainer_config": {
-        "kernel_width": null,
-        "kernel": null,
-        "sample_around_instance": false,
-        "num_features": 10,
-        "num_samples": 5000,
-        "sampling_func": "gamma",
-        "sampling_func_params": {
-          "shape_param": 1,
-          "scale": 1
+    "experiments": [
+        {
+            "model_path": "pick yours",
+            "dataset_path": "./data/big_data_zero_corr_enc",
+            "label_names": [
+                "BENIGN",
+                "DDoS",
+                "PortScan",
+                "Bot",
+                "Infiltration",
+                "Web Attack \ufffd Brute Force",
+                "Web Attack \ufffd XSS",
+                "Web Attack \ufffd Sql Injection",
+                "FTP-Patator",
+                "SSH-Patator",
+                "DoS slowloris",
+                "DoS Slowhttptest",
+                "DoS Hulk",
+                "DoS GoldenEye",
+                "Heartbleed",
+                "DoS attacks-SlowHTTPTest",
+                "DoS attacks-Hulk",
+                "Brute Force -Web",
+                "Brute Force -XSS",
+                "SQL Injection",
+                "DDoS attacks-LOIC-HTTP",
+                "Infilteration",
+                "DoS attacks-GoldenEye",
+                "DoS attacks-Slowloris",
+                "FTP-BruteForce",
+                "SSH-Bruteforce",
+                "DDOS attack-LOIC-UDP",
+                "DDOS attack-HOIC"
+            ],
+            "categorical_columns_names": [
+                "Fwd PSH Flags",
+                "Fwd URG Flags",
+                "FIN Flag Count",
+                "RST Flag Count",
+                "PSH Flag Count",
+                "ACK Flag Count",
+                "URG Flag Count"
+            ],
+            "explainer_config": {
+                "kernel_width": null,
+                "kernel": null,
+                "sample_around_instance": false,
+                "num_features": 10,
+                "num_samples": 5000,
+                "sampling_func": "weibull",
+                "sampling_func_params": {
+                    "shape_param": 0.8
+                }
+            },
+            "times_to_run": 30,
+            "random_seed": null,
+            "class_label_to_explain": 0
+        },
+        {
+            "model_path": "pick yours",
+            "dataset_path": "./data/big_data_zero_corr_enc",
+            "label_names": [
+                "BENIGN",
+                "DDoS",
+                "PortScan",
+                "Bot",
+                "Infiltration",
+                "Web Attack \ufffd Brute Force",
+                "Web Attack \ufffd XSS",
+                "Web Attack \ufffd Sql Injection",
+                "FTP-Patator",
+                "SSH-Patator",
+                "DoS slowloris",
+                "DoS Slowhttptest",
+                "DoS Hulk",
+                "DoS GoldenEye",
+                "Heartbleed",
+                "DoS attacks-SlowHTTPTest",
+                "DoS attacks-Hulk",
+                "Brute Force -Web",
+                "Brute Force -XSS",
+                "SQL Injection",
+                "DDoS attacks-LOIC-HTTP",
+                "Infilteration",
+                "DoS attacks-GoldenEye",
+                "DoS attacks-Slowloris",
+                "FTP-BruteForce",
+                "SSH-Bruteforce",
+                "DDOS attack-LOIC-UDP",
+                "DDOS attack-HOIC"
+            ],
+            "categorical_columns_names": [
+                "Fwd PSH Flags",
+                "Fwd URG Flags",
+                "FIN Flag Count",
+                "RST Flag Count",
+                "PSH Flag Count",
+                "ACK Flag Count",
+                "URG Flag Count"
+            ],
+            "explainer_config": {
+                "kernel_width": null,
+                "kernel": null,
+                "sample_around_instance": false,
+                "num_features": 10,
+                "num_samples": 5000,
+                "sampling_func": "weibull",
+                "sampling_func_params": {
+                    "shape_param": 0.8
+                }
+            },
+            "times_to_run": 30,
+            "random_seed": null,
+            "class_label_to_explain": 0
+        },
+        {
+            "model_path": "pick yours",
+            "dataset_path": "./data/big_data_zero_corr_enc",
+            "label_names": [
+                "BENIGN",
+                "DDoS",
+                "PortScan",
+                "Bot",
+                "Infiltration",
+                "Web Attack \ufffd Brute Force",
+                "Web Attack \ufffd XSS",
+                "Web Attack \ufffd Sql Injection",
+                "FTP-Patator",
+                "SSH-Patator",
+                "DoS slowloris",
+                "DoS Slowhttptest",
+                "DoS Hulk",
+                "DoS GoldenEye",
+                "Heartbleed",
+                "DoS attacks-SlowHTTPTest",
+                "DoS attacks-Hulk",
+                "Brute Force -Web",
+                "Brute Force -XSS",
+                "SQL Injection",
+                "DDoS attacks-LOIC-HTTP",
+                "Infilteration",
+                "DoS attacks-GoldenEye",
+                "DoS attacks-Slowloris",
+                "FTP-BruteForce",
+                "SSH-Bruteforce",
+                "DDOS attack-LOIC-UDP",
+                "DDOS attack-HOIC"
+            ],
+            "categorical_columns_names": [
+                "Fwd PSH Flags",
+                "Fwd URG Flags",
+                "FIN Flag Count",
+                "RST Flag Count",
+                "PSH Flag Count",
+                "ACK Flag Count",
+                "URG Flag Count"
+            ],
+            "explainer_config": {
+                "kernel_width": null,
+                "kernel": null,
+                "sample_around_instance": false,
+                "num_features": 10,
+                "num_samples": 5000,
+                "sampling_func": "weibull",
+                "sampling_func_params": {
+                    "shape_param": 0.8
+                }
+            },
+            "times_to_run": 30,
+            "random_seed": null,
+            "class_label_to_explain": 0
+        },
+        {
+            "model_path": "pick yours",
+            "dataset_path": "./data/big_data_zero_corr_enc",
+            "label_names": [
+                "BENIGN",
+                "DDoS",
+                "PortScan",
+                "Bot",
+                "Infiltration",
+                "Web Attack \ufffd Brute Force",
+                "Web Attack \ufffd XSS",
+                "Web Attack \ufffd Sql Injection",
+                "FTP-Patator",
+                "SSH-Patator",
+                "DoS slowloris",
+                "DoS Slowhttptest",
+                "DoS Hulk",
+                "DoS GoldenEye",
+                "Heartbleed",
+                "DoS attacks-SlowHTTPTest",
+                "DoS attacks-Hulk",
+                "Brute Force -Web",
+                "Brute Force -XSS",
+                "SQL Injection",
+                "DDoS attacks-LOIC-HTTP",
+                "Infilteration",
+                "DoS attacks-GoldenEye",
+                "DoS attacks-Slowloris",
+                "FTP-BruteForce",
+                "SSH-Bruteforce",
+                "DDOS attack-LOIC-UDP",
+                "DDOS attack-HOIC"
+            ],
+            "categorical_columns_names": [
+                "Fwd PSH Flags",
+                "Fwd URG Flags",
+                "FIN Flag Count",
+                "RST Flag Count",
+                "PSH Flag Count",
+                "ACK Flag Count",
+                "URG Flag Count"
+            ],
+            "explainer_config": {
+                "kernel_width": null,
+                "kernel": null,
+                "sample_around_instance": false,
+                "num_features": 10,
+                "num_samples": 5000,
+                "sampling_func": "weibull",
+                "sampling_func_params": {
+                    "shape_param": 0.8
+                }
+            },
+            "times_to_run": 30,
+            "random_seed": null,
+            "class_label_to_explain": 0
+        },
+        {
+            "model_path": "pick yours",
+            "dataset_path": "./data/big_data_zero_corr_enc",
+            "label_names": [
+                "BENIGN",
+                "DDoS",
+                "PortScan",
+                "Bot",
+                "Infiltration",
+                "Web Attack \ufffd Brute Force",
+                "Web Attack \ufffd XSS",
+                "Web Attack \ufffd Sql Injection",
+                "FTP-Patator",
+                "SSH-Patator",
+                "DoS slowloris",
+                "DoS Slowhttptest",
+                "DoS Hulk",
+                "DoS GoldenEye",
+                "Heartbleed",
+                "DoS attacks-SlowHTTPTest",
+                "DoS attacks-Hulk",
+                "Brute Force -Web",
+                "Brute Force -XSS",
+                "SQL Injection",
+                "DDoS attacks-LOIC-HTTP",
+                "Infilteration",
+                "DoS attacks-GoldenEye",
+                "DoS attacks-Slowloris",
+                "FTP-BruteForce",
+                "SSH-Bruteforce",
+                "DDOS attack-LOIC-UDP",
+                "DDOS attack-HOIC"
+            ],
+            "categorical_columns_names": [
+                "Fwd PSH Flags",
+                "Fwd URG Flags",
+                "FIN Flag Count",
+                "RST Flag Count",
+                "PSH Flag Count",
+                "ACK Flag Count",
+                "URG Flag Count"
+            ],
+            "explainer_config": {
+                "kernel_width": null,
+                "kernel": null,
+                "sample_around_instance": false,
+                "num_features": 10,
+                "num_samples": 5000,
+                "sampling_func": "weibull",
+                "sampling_func_params": {
+                    "shape_param": 0.8
+                }
+            },
+            "times_to_run": 30,
+            "random_seed": null,
+            "class_label_to_explain": 0
+        },
+        {
+            "model_path": "pick yours",
+            "dataset_path": "./data/big_data_zero_corr_enc",
+            "label_names": [
+                "BENIGN",
+                "DDoS",
+                "PortScan",
+                "Bot",
+                "Infiltration",
+                "Web Attack \ufffd Brute Force",
+                "Web Attack \ufffd XSS",
+                "Web Attack \ufffd Sql Injection",
+                "FTP-Patator",
+                "SSH-Patator",
+                "DoS slowloris",
+                "DoS Slowhttptest",
+                "DoS Hulk",
+                "DoS GoldenEye",
+                "Heartbleed",
+                "DoS attacks-SlowHTTPTest",
+                "DoS attacks-Hulk",
+                "Brute Force -Web",
+                "Brute Force -XSS",
+                "SQL Injection",
+                "DDoS attacks-LOIC-HTTP",
+                "Infilteration",
+                "DoS attacks-GoldenEye",
+                "DoS attacks-Slowloris",
+                "FTP-BruteForce",
+                "SSH-Bruteforce",
+                "DDOS attack-LOIC-UDP",
+                "DDOS attack-HOIC"
+            ],
+            "categorical_columns_names": [
+                "Fwd PSH Flags",
+                "Fwd URG Flags",
+                "FIN Flag Count",
+                "RST Flag Count",
+                "PSH Flag Count",
+                "ACK Flag Count",
+                "URG Flag Count"
+            ],
+            "explainer_config": {
+                "kernel_width": null,
+                "kernel": null,
+                "sample_around_instance": false,
+                "num_features": 10,
+                "num_samples": 5000,
+                "sampling_func": "weibull",
+                "sampling_func_params": {
+                    "shape_param": 0.8
+                }
+            },
+            "times_to_run": 30,
+            "random_seed": null,
+            "class_label_to_explain": 0
+        },
+        {
+            "model_path": "pick yours",
+            "dataset_path": "./data/big_data_zero_corr_enc",
+            "label_names": [
+                "BENIGN",
+                "DDoS",
+                "PortScan",
+                "Bot",
+                "Infiltration",
+                "Web Attack \ufffd Brute Force",
+                "Web Attack \ufffd XSS",
+                "Web Attack \ufffd Sql Injection",
+                "FTP-Patator",
+                "SSH-Patator",
+                "DoS slowloris",
+                "DoS Slowhttptest",
+                "DoS Hulk",
+                "DoS GoldenEye",
+                "Heartbleed",
+                "DoS attacks-SlowHTTPTest",
+                "DoS attacks-Hulk",
+                "Brute Force -Web",
+                "Brute Force -XSS",
+                "SQL Injection",
+                "DDoS attacks-LOIC-HTTP",
+                "Infilteration",
+                "DoS attacks-GoldenEye",
+                "DoS attacks-Slowloris",
+                "FTP-BruteForce",
+                "SSH-Bruteforce",
+                "DDOS attack-LOIC-UDP",
+                "DDOS attack-HOIC"
+            ],
+            "categorical_columns_names": [
+                "Fwd PSH Flags",
+                "Fwd URG Flags",
+                "FIN Flag Count",
+                "RST Flag Count",
+                "PSH Flag Count",
+                "ACK Flag Count",
+                "URG Flag Count"
+            ],
+            "explainer_config": {
+                "kernel_width": null,
+                "kernel": null,
+                "sample_around_instance": false,
+                "num_features": 10,
+                "num_samples": 5000,
+                "sampling_func": "weibull",
+                "sampling_func_params": {
+                    "shape_param": 0.8
+                }
+            },
+            "times_to_run": 30,
+            "random_seed": null,
+            "class_label_to_explain": 0
+        },
+        {
+            "model_path": "pick yours",
+            "dataset_path": "./data/big_data_zero_corr_enc",
+            "label_names": [
+                "BENIGN",
+                "DDoS",
+                "PortScan",
+                "Bot",
+                "Infiltration",
+                "Web Attack \ufffd Brute Force",
+                "Web Attack \ufffd XSS",
+                "Web Attack \ufffd Sql Injection",
+                "FTP-Patator",
+                "SSH-Patator",
+                "DoS slowloris",
+                "DoS Slowhttptest",
+                "DoS Hulk",
+                "DoS GoldenEye",
+                "Heartbleed",
+                "DoS attacks-SlowHTTPTest",
+                "DoS attacks-Hulk",
+                "Brute Force -Web",
+                "Brute Force -XSS",
+                "SQL Injection",
+                "DDoS attacks-LOIC-HTTP",
+                "Infilteration",
+                "DoS attacks-GoldenEye",
+                "DoS attacks-Slowloris",
+                "FTP-BruteForce",
+                "SSH-Bruteforce",
+                "DDOS attack-LOIC-UDP",
+                "DDOS attack-HOIC"
+            ],
+            "categorical_columns_names": [
+                "Fwd PSH Flags",
+                "Fwd URG Flags",
+                "FIN Flag Count",
+                "RST Flag Count",
+                "PSH Flag Count",
+                "ACK Flag Count",
+                "URG Flag Count"
+            ],
+            "explainer_config": {
+                "kernel_width": null,
+                "kernel": null,
+                "sample_around_instance": false,
+                "num_features": 10,
+                "num_samples": 5000,
+                "sampling_func": "weibull",
+                "sampling_func_params": {
+                    "shape_param": 0.8
+                }
+            },
+            "times_to_run": 30,
+            "random_seed": null,
+            "class_label_to_explain": 0
+        },
+        {
+            "model_path": "pick yours",
+            "dataset_path": "./data/big_data_zero_corr_enc",
+            "label_names": [
+                "BENIGN",
+                "DDoS",
+                "PortScan",
+                "Bot",
+                "Infiltration",
+                "Web Attack \ufffd Brute Force",
+                "Web Attack \ufffd XSS",
+                "Web Attack \ufffd Sql Injection",
+                "FTP-Patator",
+                "SSH-Patator",
+                "DoS slowloris",
+                "DoS Slowhttptest",
+                "DoS Hulk",
+                "DoS GoldenEye",
+                "Heartbleed",
+                "DoS attacks-SlowHTTPTest",
+                "DoS attacks-Hulk",
+                "Brute Force -Web",
+                "Brute Force -XSS",
+                "SQL Injection",
+                "DDoS attacks-LOIC-HTTP",
+                "Infilteration",
+                "DoS attacks-GoldenEye",
+                "DoS attacks-Slowloris",
+                "FTP-BruteForce",
+                "SSH-Bruteforce",
+                "DDOS attack-LOIC-UDP",
+                "DDOS attack-HOIC"
+            ],
+            "categorical_columns_names": [
+                "Fwd PSH Flags",
+                "Fwd URG Flags",
+                "FIN Flag Count",
+                "RST Flag Count",
+                "PSH Flag Count",
+                "ACK Flag Count",
+                "URG Flag Count"
+            ],
+            "explainer_config": {
+                "kernel_width": null,
+                "kernel": null,
+                "sample_around_instance": false,
+                "num_features": 10,
+                "num_samples": 5000,
+                "sampling_func": "weibull",
+                "sampling_func_params": {
+                    "shape_param": 0.8
+                }
+            },
+            "times_to_run": 30,
+            "random_seed": null,
+            "class_label_to_explain": 0
+        },
+        {
+            "model_path": "pick yours",
+            "dataset_path": "./data/big_data_zero_corr_enc",
+            "label_names": [
+                "BENIGN",
+                "DDoS",
+                "PortScan",
+                "Bot",
+                "Infiltration",
+                "Web Attack \ufffd Brute Force",
+                "Web Attack \ufffd XSS",
+                "Web Attack \ufffd Sql Injection",
+                "FTP-Patator",
+                "SSH-Patator",
+                "DoS slowloris",
+                "DoS Slowhttptest",
+                "DoS Hulk",
+                "DoS GoldenEye",
+                "Heartbleed",
+                "DoS attacks-SlowHTTPTest",
+                "DoS attacks-Hulk",
+                "Brute Force -Web",
+                "Brute Force -XSS",
+                "SQL Injection",
+                "DDoS attacks-LOIC-HTTP",
+                "Infilteration",
+                "DoS attacks-GoldenEye",
+                "DoS attacks-Slowloris",
+                "FTP-BruteForce",
+                "SSH-Bruteforce",
+                "DDOS attack-LOIC-UDP",
+                "DDOS attack-HOIC"
+            ],
+            "categorical_columns_names": [
+                "Fwd PSH Flags",
+                "Fwd URG Flags",
+                "FIN Flag Count",
+                "RST Flag Count",
+                "PSH Flag Count",
+                "ACK Flag Count",
+                "URG Flag Count"
+            ],
+            "explainer_config": {
+                "kernel_width": null,
+                "kernel": null,
+                "sample_around_instance": false,
+                "num_features": 10,
+                "num_samples": 5000,
+                "sampling_func": "weibull",
+                "sampling_func_params": {
+                    "shape_param": 0.8
+                }
+            },
+            "times_to_run": 30,
+            "random_seed": null,
+            "class_label_to_explain": 0
+        },
+        {
+            "model_path": "pick yours",
+            "dataset_path": "./data/big_data_zero_corr_enc",
+            "label_names": [
+                "BENIGN",
+                "DDoS",
+                "PortScan",
+                "Bot",
+                "Infiltration",
+                "Web Attack \ufffd Brute Force",
+                "Web Attack \ufffd XSS",
+                "Web Attack \ufffd Sql Injection",
+                "FTP-Patator",
+                "SSH-Patator",
+                "DoS slowloris",
+                "DoS Slowhttptest",
+                "DoS Hulk",
+                "DoS GoldenEye",
+                "Heartbleed",
+                "DoS attacks-SlowHTTPTest",
+                "DoS attacks-Hulk",
+                "Brute Force -Web",
+                "Brute Force -XSS",
+                "SQL Injection",
+                "DDoS attacks-LOIC-HTTP",
+                "Infilteration",
+                "DoS attacks-GoldenEye",
+                "DoS attacks-Slowloris",
+                "FTP-BruteForce",
+                "SSH-Bruteforce",
+                "DDOS attack-LOIC-UDP",
+                "DDOS attack-HOIC"
+            ],
+            "categorical_columns_names": [
+                "Fwd PSH Flags",
+                "Fwd URG Flags",
+                "FIN Flag Count",
+                "RST Flag Count",
+                "PSH Flag Count",
+                "ACK Flag Count",
+                "URG Flag Count"
+            ],
+            "explainer_config": {
+                "kernel_width": null,
+                "kernel": null,
+                "sample_around_instance": false,
+                "num_features": 10,
+                "num_samples": 5000,
+                "sampling_func": "weibull",
+                "sampling_func_params": {
+                    "shape_param": 0.8
+                }
+            },
+            "times_to_run": 30,
+            "random_seed": null,
+            "class_label_to_explain": 0
+        },
+        {
+            "model_path": "pick yours",
+            "dataset_path": "./data/big_data_zero_corr_enc",
+            "label_names": [
+                "BENIGN",
+                "DDoS",
+                "PortScan",
+                "Bot",
+                "Infiltration",
+                "Web Attack \ufffd Brute Force",
+                "Web Attack \ufffd XSS",
+                "Web Attack \ufffd Sql Injection",
+                "FTP-Patator",
+                "SSH-Patator",
+                "DoS slowloris",
+                "DoS Slowhttptest",
+                "DoS Hulk",
+                "DoS GoldenEye",
+                "Heartbleed",
+                "DoS attacks-SlowHTTPTest",
+                "DoS attacks-Hulk",
+                "Brute Force -Web",
+                "Brute Force -XSS",
+                "SQL Injection",
+                "DDoS attacks-LOIC-HTTP",
+                "Infilteration",
+                "DoS attacks-GoldenEye",
+                "DoS attacks-Slowloris",
+                "FTP-BruteForce",
+                "SSH-Bruteforce",
+                "DDOS attack-LOIC-UDP",
+                "DDOS attack-HOIC"
+            ],
+            "categorical_columns_names": [
+                "Fwd PSH Flags",
+                "Fwd URG Flags",
+                "FIN Flag Count",
+                "RST Flag Count",
+                "PSH Flag Count",
+                "ACK Flag Count",
+                "URG Flag Count"
+            ],
+            "explainer_config": {
+                "kernel_width": null,
+                "kernel": null,
+                "sample_around_instance": false,
+                "num_features": 10,
+                "num_samples": 5000,
+                "sampling_func": "weibull",
+                "sampling_func_params": {
+                    "shape_param": 0.8
+                }
+            },
+            "times_to_run": 30,
+            "random_seed": null,
+            "class_label_to_explain": 0
+        },
+        {
+            "model_path": "pick yours",
+            "dataset_path": "./data/big_data_zero_corr_enc",
+            "label_names": [
+                "BENIGN",
+                "DDoS",
+                "PortScan",
+                "Bot",
+                "Infiltration",
+                "Web Attack \ufffd Brute Force",
+                "Web Attack \ufffd XSS",
+                "Web Attack \ufffd Sql Injection",
+                "FTP-Patator",
+                "SSH-Patator",
+                "DoS slowloris",
+                "DoS Slowhttptest",
+                "DoS Hulk",
+                "DoS GoldenEye",
+                "Heartbleed",
+                "DoS attacks-SlowHTTPTest",
+                "DoS attacks-Hulk",
+                "Brute Force -Web",
+                "Brute Force -XSS",
+                "SQL Injection",
+                "DDoS attacks-LOIC-HTTP",
+                "Infilteration",
+                "DoS attacks-GoldenEye",
+                "DoS attacks-Slowloris",
+                "FTP-BruteForce",
+                "SSH-Bruteforce",
+                "DDOS attack-LOIC-UDP",
+                "DDOS attack-HOIC"
+            ],
+            "categorical_columns_names": [
+                "Fwd PSH Flags",
+                "Fwd URG Flags",
+                "FIN Flag Count",
+                "RST Flag Count",
+                "PSH Flag Count",
+                "ACK Flag Count",
+                "URG Flag Count"
+            ],
+            "explainer_config": {
+                "kernel_width": null,
+                "kernel": null,
+                "sample_around_instance": false,
+                "num_features": 10,
+                "num_samples": 5000,
+                "sampling_func": "weibull",
+                "sampling_func_params": {
+                    "shape_param": 0.8
+                }
+            },
+            "times_to_run": 30,
+            "random_seed": null,
+            "class_label_to_explain": 0
         }
-      },
-      "times_to_run": 30,
-      "random_seed": null
-    },
-    {
-      "model_path": "model_checkpoints/random_state_42min_samples_split_2max_depth_30min_samples_leaf_1max_features_sqrt_val.pkl",
-      "dataset_path": "./data/big_data_zero_corr_enc",
-      "label_names": ["BENIGN", "DDoS", "PortScan", "Bot", "Infiltration", "Web Attack � Brute Force", "Web Attack � XSS", "Web Attack � Sql Injection", "FTP-Patator", "SSH-Patator", "DoS slowloris", "DoS Slowhttptest", "DoS Hulk", "DoS GoldenEye", "Heartbleed", "DoS attacks-SlowHTTPTest", "DoS attacks-Hulk", "Brute Force -Web", "Brute Force -XSS", "SQL Injection", "DDoS attacks-LOIC-HTTP", "Infilteration", "DoS attacks-GoldenEye", "DoS attacks-Slowloris", "FTP-BruteForce", "SSH-Bruteforce", "DDOS attack-LOIC-UDP", "DDOS attack-HOIC"],
-      "categorical_columns_names": ["Fwd PSH Flags", "Fwd URG Flags", "FIN Flag Count", "RST Flag Count", "PSH Flag Count", "ACK Flag Count", "URG Flag Count"],
-      "explainer_config": {
-        "kernel_width": null,
-        "kernel": null,
-        "sample_around_instance": false,
-        "num_features": 10,
-        "num_samples": 5000,
-        "sampling_func": "beta",
-        "sampling_func_params": {
-          "alpha": 0.5,
-          "beta_param": 0.5
-        }
-      },
-      "times_to_run": 30,
-      "random_seed": null
-    },
-    {
-      "model_path": "model_checkpoints/random_state_42min_samples_split_2max_depth_30min_samples_leaf_1max_features_sqrt_val.pkl",
-      "dataset_path": "./data/big_data_zero_corr_enc",
-      "label_names": ["BENIGN", "DDoS", "PortScan", "Bot", "Infiltration", "Web Attack � Brute Force", "Web Attack � XSS", "Web Attack � Sql Injection", "FTP-Patator", "SSH-Patator", "DoS slowloris", "DoS Slowhttptest", "DoS Hulk", "DoS GoldenEye", "Heartbleed", "DoS attacks-SlowHTTPTest", "DoS attacks-Hulk", "Brute Force -Web", "Brute Force -XSS", "SQL Injection", "DDoS attacks-LOIC-HTTP", "Infilteration", "DoS attacks-GoldenEye", "DoS attacks-Slowloris", "FTP-BruteForce", "SSH-Bruteforce", "DDOS attack-LOIC-UDP", "DDOS attack-HOIC"],
-      "categorical_columns_names": ["Fwd PSH Flags", "Fwd URG Flags", "FIN Flag Count", "RST Flag Count", "PSH Flag Count", "ACK Flag Count", "URG Flag Count"],
-      "explainer_config": {
-        "kernel_width": null,
-        "kernel": null,
-        "sample_around_instance": false,
-        "num_features": 10,
-        "num_samples": 5000,
-        "sampling_func": "pareto",
-        "sampling_func_params": {
-          "shape_param": 3
-        }
-      },
-      "times_to_run": 30,
-      "random_seed": null
-    },
-    {
-      "model_path": "model_checkpoints/random_state_42min_samples_split_2max_depth_30min_samples_leaf_1max_features_sqrt_val.pkl",
-      "dataset_path": "./data/big_data_zero_corr_enc",
-      "label_names": ["BENIGN", "DDoS", "PortScan", "Bot", "Infiltration", "Web Attack � Brute Force", "Web Attack � XSS", "Web Attack � Sql Injection", "FTP-Patator", "SSH-Patator", "DoS slowloris", "DoS Slowhttptest", "DoS Hulk", "DoS GoldenEye", "Heartbleed", "DoS attacks-SlowHTTPTest", "DoS attacks-Hulk", "Brute Force -Web", "Brute Force -XSS", "SQL Injection", "DDoS attacks-LOIC-HTTP", "Infilteration", "DoS attacks-GoldenEye", "DoS attacks-Slowloris", "FTP-BruteForce", "SSH-Bruteforce", "DDOS attack-LOIC-UDP", "DDOS attack-HOIC"],
-      "categorical_columns_names": ["Fwd PSH Flags", "Fwd URG Flags", "FIN Flag Count", "RST Flag Count", "PSH Flag Count", "ACK Flag Count", "URG Flag Count"],
-      "explainer_config": {
-        "kernel_width": null,
-        "kernel": null,
-        "sample_around_instance": false,
-        "num_features": 10,
-        "num_samples": 5000,
-        "sampling_func": "pareto",
-        "sampling_func_params": {
-          "shape_param": 4
-        }
-      },
-      "times_to_run": 30,
-      "random_seed": null
-    },
-    {
-      "model_path": "model_checkpoints/random_state_42min_samples_split_2max_depth_30min_samples_leaf_1max_features_sqrt_val.pkl",
-      "dataset_path": "./data/big_data_zero_corr_enc",
-      "label_names": ["BENIGN", "DDoS", "PortScan", "Bot", "Infiltration", "Web Attack � Brute Force", "Web Attack � XSS", "Web Attack � Sql Injection", "FTP-Patator", "SSH-Patator", "DoS slowloris", "DoS Slowhttptest", "DoS Hulk", "DoS GoldenEye", "Heartbleed", "DoS attacks-SlowHTTPTest", "DoS attacks-Hulk", "Brute Force -Web", "Brute Force -XSS", "SQL Injection", "DDoS attacks-LOIC-HTTP", "Infilteration", "DoS attacks-GoldenEye", "DoS attacks-Slowloris", "FTP-BruteForce", "SSH-Bruteforce", "DDOS attack-LOIC-UDP", "DDOS attack-HOIC"],
-      "categorical_columns_names": ["Fwd PSH Flags", "Fwd URG Flags", "FIN Flag Count", "RST Flag Count", "PSH Flag Count", "ACK Flag Count", "URG Flag Count"],
-      "explainer_config": {
-        "kernel_width": null,
-        "kernel": null,
-        "sample_around_instance": false,
-        "num_features": 10,
-        "num_samples": 5000,
-        "sampling_func": "pareto",
-        "sampling_func_params": {
-          "shape_param": 5
-        }
-      },
-      "times_to_run": 30,
-      "random_seed": null
-    },
-    {
-      "model_path": "model_checkpoints/random_state_42min_samples_split_2max_depth_30min_samples_leaf_1max_features_sqrt_val.pkl",
-      "dataset_path": "./data/big_data_zero_corr_enc",
-      "label_names": ["BENIGN", "DDoS", "PortScan", "Bot", "Infiltration", "Web Attack � Brute Force", "Web Attack � XSS", "Web Attack � Sql Injection", "FTP-Patator", "SSH-Patator", "DoS slowloris", "DoS Slowhttptest", "DoS Hulk", "DoS GoldenEye", "Heartbleed", "DoS attacks-SlowHTTPTest", "DoS attacks-Hulk", "Brute Force -Web", "Brute Force -XSS", "SQL Injection", "DDoS attacks-LOIC-HTTP", "Infilteration", "DoS attacks-GoldenEye", "DoS attacks-Slowloris", "FTP-BruteForce", "SSH-Bruteforce", "DDOS attack-LOIC-UDP", "DDOS attack-HOIC"],
-      "categorical_columns_names": ["Fwd PSH Flags", "Fwd URG Flags", "FIN Flag Count", "RST Flag Count", "PSH Flag Count", "ACK Flag Count", "URG Flag Count"],
-      "explainer_config": {
-        "kernel_width": null,
-        "kernel": null,
-        "sample_around_instance": false,
-        "num_features": 10,
-        "num_samples": 5000,
-        "sampling_func": "pareto",
-        "sampling_func_params": {
-          "shape_param": 6
-        }
-      },
-      "times_to_run": 30,
-      "random_seed": null
-    },
-    {
-      "model_path": "model_checkpoints/random_state_42min_samples_split_2max_depth_30min_samples_leaf_1max_features_sqrt_val.pkl",
-      "dataset_path": "./data/big_data_zero_corr_enc",
-      "label_names": ["BENIGN", "DDoS", "PortScan", "Bot", "Infiltration", "Web Attack � Brute Force", "Web Attack � XSS", "Web Attack � Sql Injection", "FTP-Patator", "SSH-Patator", "DoS slowloris", "DoS Slowhttptest", "DoS Hulk", "DoS GoldenEye", "Heartbleed", "DoS attacks-SlowHTTPTest", "DoS attacks-Hulk", "Brute Force -Web", "Brute Force -XSS", "SQL Injection", "DDoS attacks-LOIC-HTTP", "Infilteration", "DoS attacks-GoldenEye", "DoS attacks-Slowloris", "FTP-BruteForce", "SSH-Bruteforce", "DDOS attack-LOIC-UDP", "DDOS attack-HOIC"],
-      "categorical_columns_names": ["Fwd PSH Flags", "Fwd URG Flags", "FIN Flag Count", "RST Flag Count", "PSH Flag Count", "ACK Flag Count", "URG Flag Count"],
-      "explainer_config": {
-        "kernel_width": null,
-        "kernel": null,
-        "sample_around_instance": false,
-        "num_features": 10,
-        "num_samples": 5000,
-        "sampling_func": "pareto",
-        "sampling_func_params": {
-          "shape_param": 7
-        }
-      },
-      "times_to_run": 30,
-      "random_seed": null
-    },
-    {
-      "model_path": "model_checkpoints/random_state_42min_samples_split_2max_depth_30min_samples_leaf_1max_features_sqrt_val.pkl",
-      "dataset_path": "./data/big_data_zero_corr_enc",
-      "label_names": ["BENIGN", "DDoS", "PortScan", "Bot", "Infiltration", "Web Attack � Brute Force", "Web Attack � XSS", "Web Attack � Sql Injection", "FTP-Patator", "SSH-Patator", "DoS slowloris", "DoS Slowhttptest", "DoS Hulk", "DoS GoldenEye", "Heartbleed", "DoS attacks-SlowHTTPTest", "DoS attacks-Hulk", "Brute Force -Web", "Brute Force -XSS", "SQL Injection", "DDoS attacks-LOIC-HTTP", "Infilteration", "DoS attacks-GoldenEye", "DoS attacks-Slowloris", "FTP-BruteForce", "SSH-Bruteforce", "DDOS attack-LOIC-UDP", "DDOS attack-HOIC"],
-      "categorical_columns_names": ["Fwd PSH Flags", "Fwd URG Flags", "FIN Flag Count", "RST Flag Count", "PSH Flag Count", "ACK Flag Count", "URG Flag Count"],
-      "explainer_config": {
-        "kernel_width": null,
-        "kernel": null,
-        "sample_around_instance": false,
-        "num_features": 10,
-        "num_samples": 5000,
-        "sampling_func": "weibull",
-        "sampling_func_params": {
-          "shape_param": 0.1
-        }
-      },
-      "times_to_run": 30,
-      "random_seed": null
-    },
-    {
-      "model_path": "model_checkpoints/random_state_42min_samples_split_2max_depth_30min_samples_leaf_1max_features_sqrt_val.pkl",
-      "dataset_path": "./data/big_data_zero_corr_enc",
-      "label_names": ["BENIGN", "DDoS", "PortScan", "Bot", "Infiltration", "Web Attack � Brute Force", "Web Attack � XSS", "Web Attack � Sql Injection", "FTP-Patator", "SSH-Patator", "DoS slowloris", "DoS Slowhttptest", "DoS Hulk", "DoS GoldenEye", "Heartbleed", "DoS attacks-SlowHTTPTest", "DoS attacks-Hulk", "Brute Force -Web", "Brute Force -XSS", "SQL Injection", "DDoS attacks-LOIC-HTTP", "Infilteration", "DoS attacks-GoldenEye", "DoS attacks-Slowloris", "FTP-BruteForce", "SSH-Bruteforce", "DDOS attack-LOIC-UDP", "DDOS attack-HOIC"],
-      "categorical_columns_names": ["Fwd PSH Flags", "Fwd URG Flags", "FIN Flag Count", "RST Flag Count", "PSH Flag Count", "ACK Flag Count", "URG Flag Count"],
-      "explainer_config": {
-        "kernel_width": null,
-        "kernel": null,
-        "sample_around_instance": false,
-        "num_features": 10,
-        "num_samples": 5000,
-        "sampling_func": "weibull",
-        "sampling_func_params": {
-          "shape_param": 0.2
-        }
-      },
-      "times_to_run": 30,
-      "random_seed": null
-    },
-    {
-      "model_path": "model_checkpoints/random_state_42min_samples_split_2max_depth_30min_samples_leaf_1max_features_sqrt_val.pkl",
-      "dataset_path": "./data/big_data_zero_corr_enc",
-      "label_names": ["BENIGN", "DDoS", "PortScan", "Bot", "Infiltration", "Web Attack � Brute Force", "Web Attack � XSS", "Web Attack � Sql Injection", "FTP-Patator", "SSH-Patator", "DoS slowloris", "DoS Slowhttptest", "DoS Hulk", "DoS GoldenEye", "Heartbleed", "DoS attacks-SlowHTTPTest", "DoS attacks-Hulk", "Brute Force -Web", "Brute Force -XSS", "SQL Injection", "DDoS attacks-LOIC-HTTP", "Infilteration", "DoS attacks-GoldenEye", "DoS attacks-Slowloris", "FTP-BruteForce", "SSH-Bruteforce", "DDOS attack-LOIC-UDP", "DDOS attack-HOIC"],
-      "categorical_columns_names": ["Fwd PSH Flags", "Fwd URG Flags", "FIN Flag Count", "RST Flag Count", "PSH Flag Count", "ACK Flag Count", "URG Flag Count"],
-      "explainer_config": {
-        "kernel_width": null,
-        "kernel": null,
-        "sample_around_instance": false,
-        "num_features": 10,
-        "num_samples": 5000,
-        "sampling_func": "weibull",
-        "sampling_func_params": {
-          "shape_param": 0.3
-        }
-      },
-      "times_to_run": 30,
-      "random_seed": null
-    },
-    {
-      "model_path": "model_checkpoints/random_state_42min_samples_split_2max_depth_30min_samples_leaf_1max_features_sqrt_val.pkl",
-      "dataset_path": "./data/big_data_zero_corr_enc",
-      "label_names": ["BENIGN", "DDoS", "PortScan", "Bot", "Infiltration", "Web Attack � Brute Force", "Web Attack � XSS", "Web Attack � Sql Injection", "FTP-Patator", "SSH-Patator", "DoS slowloris", "DoS Slowhttptest", "DoS Hulk", "DoS GoldenEye", "Heartbleed", "DoS attacks-SlowHTTPTest", "DoS attacks-Hulk", "Brute Force -Web", "Brute Force -XSS", "SQL Injection", "DDoS attacks-LOIC-HTTP", "Infilteration", "DoS attacks-GoldenEye", "DoS attacks-Slowloris", "FTP-BruteForce", "SSH-Bruteforce", "DDOS attack-LOIC-UDP", "DDOS attack-HOIC"],
-      "categorical_columns_names": ["Fwd PSH Flags", "Fwd URG Flags", "FIN Flag Count", "RST Flag Count", "PSH Flag Count", "ACK Flag Count", "URG Flag Count"],
-      "explainer_config": {
-        "kernel_width": null,
-        "kernel": null,
-        "sample_around_instance": false,
-        "num_features": 10,
-        "num_samples": 5000,
-        "sampling_func": "weibull",
-        "sampling_func_params": {
-          "shape_param": 0.4
-        }
-      },
-      "times_to_run": 30,
-      "random_seed": null
-    },
-    {
-      "model_path": "model_checkpoints/random_state_42min_samples_split_2max_depth_30min_samples_leaf_1max_features_sqrt_val.pkl",
-      "dataset_path": "./data/big_data_zero_corr_enc",
-      "label_names": ["BENIGN", "DDoS", "PortScan", "Bot", "Infiltration", "Web Attack � Brute Force", "Web Attack � XSS", "Web Attack � Sql Injection", "FTP-Patator", "SSH-Patator", "DoS slowloris", "DoS Slowhttptest", "DoS Hulk", "DoS GoldenEye", "Heartbleed", "DoS attacks-SlowHTTPTest", "DoS attacks-Hulk", "Brute Force -Web", "Brute Force -XSS", "SQL Injection", "DDoS attacks-LOIC-HTTP", "Infilteration", "DoS attacks-GoldenEye", "DoS attacks-Slowloris", "FTP-BruteForce", "SSH-Bruteforce", "DDOS attack-LOIC-UDP", "DDOS attack-HOIC"],
-      "categorical_columns_names": ["Fwd PSH Flags", "Fwd URG Flags", "FIN Flag Count", "RST Flag Count", "PSH Flag Count", "ACK Flag Count", "URG Flag Count"],
-      "explainer_config": {
-        "kernel_width": null,
-        "kernel": null,
-        "sample_around_instance": false,
-        "num_features": 10,
-        "num_samples": 5000,
-        "sampling_func": "weibull",
-        "sampling_func_params": {
-          "shape_param": 0.5
-        }
-      },
-      "times_to_run": 30,
-      "random_seed": null
-    },
-    {
-      "model_path": "model_checkpoints/random_state_42min_samples_split_2max_depth_30min_samples_leaf_1max_features_sqrt_val.pkl",
-      "dataset_path": "./data/big_data_zero_corr_enc",
-      "label_names": ["BENIGN", "DDoS", "PortScan", "Bot", "Infiltration", "Web Attack � Brute Force", "Web Attack � XSS", "Web Attack � Sql Injection", "FTP-Patator", "SSH-Patator", "DoS slowloris", "DoS Slowhttptest", "DoS Hulk", "DoS GoldenEye", "Heartbleed", "DoS attacks-SlowHTTPTest", "DoS attacks-Hulk", "Brute Force -Web", "Brute Force -XSS", "SQL Injection", "DDoS attacks-LOIC-HTTP", "Infilteration", "DoS attacks-GoldenEye", "DoS attacks-Slowloris", "FTP-BruteForce", "SSH-Bruteforce", "DDOS attack-LOIC-UDP", "DDOS attack-HOIC"],
-      "categorical_columns_names": ["Fwd PSH Flags", "Fwd URG Flags", "FIN Flag Count", "RST Flag Count", "PSH Flag Count", "ACK Flag Count", "URG Flag Count"],
-      "explainer_config": {
-        "kernel_width": null,
-        "kernel": null,
-        "sample_around_instance": false,
-        "num_features": 10,
-        "num_samples": 5000,
-        "sampling_func": "weibull",
-        "sampling_func_params": {
-          "shape_param": 0.6
-        }
-      },
-      "times_to_run": 30,
-      "random_seed": null
-    },
-    {
-      "model_path": "model_checkpoints/random_state_42min_samples_split_2max_depth_30min_samples_leaf_1max_features_sqrt_val.pkl",
-      "dataset_path": "./data/big_data_zero_corr_enc",
-      "label_names": ["BENIGN", "DDoS", "PortScan", "Bot", "Infiltration", "Web Attack � Brute Force", "Web Attack � XSS", "Web Attack � Sql Injection", "FTP-Patator", "SSH-Patator", "DoS slowloris", "DoS Slowhttptest", "DoS Hulk", "DoS GoldenEye", "Heartbleed", "DoS attacks-SlowHTTPTest", "DoS attacks-Hulk", "Brute Force -Web", "Brute Force -XSS", "SQL Injection", "DDoS attacks-LOIC-HTTP", "Infilteration", "DoS attacks-GoldenEye", "DoS attacks-Slowloris", "FTP-BruteForce", "SSH-Bruteforce", "DDOS attack-LOIC-UDP", "DDOS attack-HOIC"],
-      "categorical_columns_names": ["Fwd PSH Flags", "Fwd URG Flags", "FIN Flag Count", "RST Flag Count", "PSH Flag Count", "ACK Flag Count", "URG Flag Count"],
-      "explainer_config": {
-        "kernel_width": null,
-        "kernel": null,
-        "sample_around_instance": false,
-        "num_features": 10,
-        "num_samples": 5000,
-        "sampling_func": "weibull",
-        "sampling_func_params": {
-          "shape_param": 0.7
-        }
-      },
-      "times_to_run": 30,
-      "random_seed": null
-    },
-    {
-      "model_path": "model_checkpoints/random_state_42min_samples_split_2max_depth_30min_samples_leaf_1max_features_sqrt_val.pkl",
-      "dataset_path": "./data/big_data_zero_corr_enc",
-      "label_names": ["BENIGN", "DDoS", "PortScan", "Bot", "Infiltration", "Web Attack � Brute Force", "Web Attack � XSS", "Web Attack � Sql Injection", "FTP-Patator", "SSH-Patator", "DoS slowloris", "DoS Slowhttptest", "DoS Hulk", "DoS GoldenEye", "Heartbleed", "DoS attacks-SlowHTTPTest", "DoS attacks-Hulk", "Brute Force -Web", "Brute Force -XSS", "SQL Injection", "DDoS attacks-LOIC-HTTP", "Infilteration", "DoS attacks-GoldenEye", "DoS attacks-Slowloris", "FTP-BruteForce", "SSH-Bruteforce", "DDOS attack-LOIC-UDP", "DDOS attack-HOIC"],
-      "categorical_columns_names": ["Fwd PSH Flags", "Fwd URG Flags", "FIN Flag Count", "RST Flag Count", "PSH Flag Count", "ACK Flag Count", "URG Flag Count"],
-      "explainer_config": {
-        "kernel_width": null,
-        "kernel": null,
-        "sample_around_instance": false,
-        "num_features": 10,
-        "num_samples": 5000,
-        "sampling_func": "weibull",
-        "sampling_func_params": {
-          "shape_param": 0.8
-        }
-      },
-      "times_to_run": 30,
-      "random_seed": null
-    }
-  ]
+    ]
 }
