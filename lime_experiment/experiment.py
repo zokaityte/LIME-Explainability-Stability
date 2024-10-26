@@ -191,7 +191,8 @@ class LimeExperiment:
 
         if self._config.save_explanations:
             experiment_path = os.path.join(RESULTS_OUTPUT_DIR, self._experiment_id)
-            os.makedirs(experiment_path, exist_ok=True)
+            images_dir = os.path.join(experiment_path, "charts")
+            os.makedirs(images_dir, exist_ok=True)
 
             # Open a single CSV file for all explanations
             csv_path = os.path.join(experiment_path, "explanations.csv")
@@ -208,7 +209,7 @@ class LimeExperiment:
                         # Apply tight layout and save the image
                         fig = explanation.as_pyplot_figure(label)
                         fig.tight_layout()
-                        fig.savefig(os.path.join(experiment_path, f"{explained_label}_test_run{test_run_number}.png"))
+                        fig.savefig(os.path.join(images_dir, f"{explained_label}_run_{test_run_number}.png"))
                         plt.close(fig)
 
     def generate_experiment_id(self):
