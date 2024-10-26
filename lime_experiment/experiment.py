@@ -1,3 +1,4 @@
+import csv
 import os
 from datetime import datetime, timezone
 from typing import List, Dict
@@ -191,13 +192,24 @@ class LimeExperiment:
         if self._config.save_explanations:
             experiment_path = os.path.join(RESULTS_OUTPUT_DIR, self._experiment_id)
             os.makedirs(experiment_path, exist_ok=True)
-            for i, explanation in enumerate(self._explanations):
-                for label in explanation.available_labels():
-                    with open(os.path.join(experiment_path, f"explanation_{i}_{label}.txt"), "w") as f:
-                        f.write(str(explanation.as_list(label)))
-                    explanation.as_pyplot_figure(label).savefig(
-                        os.path.join(experiment_path, f"explanation_{i}_{label}.png"))
-                    plt.close()
+
+            # Open a single CSV file for all explanations
+            csv_path = os.path.join(experiment_path, "explanations.csv")
+            with open(csv_path, "w", newline="") as csvfile:
+                writer = csv.writer(csvfile)
+                writer.writerow(["explained_label", "test_run_number", "results"])  # Header row
+
+                for test_run_number, explanation in enumerate(self._explanations):
+                    for label in explanation.available_labels():
+                        # Write the explanation data to the CSV file
+                        explained_label = f"explained_label_{label}"
+                        writer.writerow([explained_label, test_run_number, str(explanation.as_list(label))])
+
+                        # Apply tight layout and save the image
+                        fig = explanation.as_pyplot_figure(label)
+                        fig.tight_layout()
+                        fig.savefig(os.path.join(experiment_path, f"{explained_label}_test_run{test_run_number}.png"))
+                        plt.close(fig)
 
     def generate_experiment_id(self):
         return "_".join(["exp", self._config.explained_model.model_type,
