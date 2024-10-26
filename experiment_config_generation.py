@@ -3,7 +3,7 @@ import json
 
 # Define the common configuration for each experiment
 base_experiment = {
-    "model_path": "model_checkpoints/random_state_42min_samples_split_2max_depth_30min_samples_leaf_1max_features_sqrt_val.pkl",  # Default model path
+    "model_path": "pick yours",  # Default model path
     "dataset_path": "./data/big_data_zero_corr_enc",
     "label_names": ["BENIGN", "DDoS", "PortScan", "Bot", "Infiltration", "Web Attack � Brute Force", "Web Attack � XSS",
                     "Web Attack � Sql Injection", "FTP-Patator", "SSH-Patator", "DoS slowloris", "DoS Slowhttptest",
