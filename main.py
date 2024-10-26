@@ -33,8 +33,8 @@ def run_experiment(config: dict):
         experiment_data=experiment_data,
         explainer_config=lime_explainer_config,
         times_to_run=config['times_to_run'],
-        random_seed=config.get('random_seed', None)
-    )
+        random_seed=config.get('random_seed', None),
+        class_label_to_test=config['class_label_to_explain'])
 
     experiment = LimeExperiment(config=lime_experiment_config)
     experiment.run()

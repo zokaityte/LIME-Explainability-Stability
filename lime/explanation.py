@@ -123,7 +123,7 @@ class Explanation(object):
         """
         return self.local_exp
 
-    def as_pyplot_figure(self, label=1, figsize=(4,4), **kwargs):
+    def as_pyplot_figure(self, label=1, figsize=(6,6), **kwargs):
         """Returns the explanation as a pyplot figure.
 
         Will throw an error if you don't have matplotlib installed
@@ -153,4 +153,5 @@ class Explanation(object):
         else:
             title = 'Local explanation'
         plt.title(title)
+        plt.tight_layout()
         return fig

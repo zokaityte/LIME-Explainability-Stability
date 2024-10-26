@@ -44,12 +44,14 @@ class LimeExperimentConfig:
     save_results: bool = True
     save_explanations: bool = True
     mode: str = "classification"
+    class_label_to_test: int = None # If None, a test instance will be randomly selected from the dataset.
+    # If a class label is provided, a random instance of that class will be selected.
 
     def as_records_dict(self):
         configuration_records_dict = {
             "times_explained": self.times_to_run,
             "random_seed": self.random_seed,
-            "dataset": self.experiment_data.get_dataset_path(),
+            "dataset": self.experiment_data.get_dataset_name(),
             "number_of_features": self.experiment_data.get_feature_count(),
             "number_of_categorical_features": self.experiment_data.get_categorical_features_count(),
             "categorical_features": self.experiment_data.get_categorical_features_names(),
