@@ -64,15 +64,15 @@ class LimeExperiment:
             self._save_results()
 
     @staticmethod
-    def _run_experiment(random_seed, experiment_data, explainer_config, times_to_run, explained_model, mode) -> List[
+    def _run_experiment(random_seed, experiment_data, explainer_config, times_to_run, explained_model, mode, class_label_to_test) -> List[
         Explanation]:
 
         if random_seed is not None:
             experiment_random_state = RandomState(random_seed)
-            test_instance = experiment_data.get_random_test_instance(random_seed)
+            test_instance = experiment_data.get_random_test_instance(random_seed, class_label_to_test)
         else:
             experiment_random_state = None
-            test_instance = experiment_data.get_random_test_instance(1)
+            test_instance = experiment_data.get_random_test_instance(1, class_label_to_test)
 
         explainer = LimeTabularExplainer(
             training_data=experiment_data.get_training_data(),
@@ -148,7 +148,8 @@ class LimeExperiment:
             evaluation_results.update({f"Mean R2 (label = {label})": metrics.fidelity})
 
         results = {"id": self._experiment_id, "start_time": self._start_time, "end_time": self._end_time,
-                   "test_row_index": self._config.experiment_data.random_text_row_index}
+                   "test_row_index": self._config.experiment_data.random_test_row_index,
+                   "test_row_label": self._config.experiment_data.random_test_row_label}
         results.update(self._config.as_records_dict())
         results.update(evaluation_results)
 

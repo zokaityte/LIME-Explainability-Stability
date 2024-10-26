@@ -23,7 +23,6 @@ class ExperimentData:
         self._categorical_names = None
 
     def get_training_data(self):
-        # TODO Check if validation split is needed
 
         # float64 limit into nan
         train_data = pd.read_csv(self._train_data_csv_path, engine="pyarrow", usecols=self._column_names[:-1])
@@ -38,7 +37,7 @@ class ExperimentData:
     def get_training_labels(self):
         return pd.read_csv(self._train_data_csv_path, engine="pyarrow", usecols=[self._column_names[-1]]).to_numpy()
 
-    def get_random_test_instance(self, random_seed):
+    def get_random_test_instance(self, random_seed, class_label):
         # Set the random seed for reproducibility
         if random_seed is not None:
             random.seed(random_seed)
@@ -50,9 +49,19 @@ class ExperimentData:
         imputer = SimpleImputer(strategy='mean')
         test_data_imputed = imputer.fit_transform(test_data)
 
+        # Filter by class label
+        if class_label is not None:
+
+            # Check if the class label exists in the dataset
+            if class_label not in test_data_imputed[:, -1]:
+                raise ValueError(f"The class label {class_label} does not exist in the dataset.")
+
+            test_data_imputed = test_data_imputed[test_data_imputed[:, -1] == class_label]
+
         # Select a random row index
-        random_row_index = random.randint(0, test_data.shape[0])
-        self.random_text_row_index = random_row_index
+        random_row_index = random.randint(0, test_data_imputed.shape[0])
+        self.random_test_row_index = random_row_index
+        self.random_test_row_label = test_data_imputed[random_row_index, -1]
 
         # Select the features of the random row
         random_row_features = test_data_imputed[random_row_index, :-1].reshape(1, -1).flatten()
