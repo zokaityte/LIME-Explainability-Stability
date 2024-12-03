@@ -14,7 +14,7 @@ import plotly.graph_objects as go
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 # Include path for generics
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../common')))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../utils')))
 
 # From common includes
 from generic import printc

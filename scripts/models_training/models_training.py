@@ -4,20 +4,20 @@ import sys
 import numpy as np
 import pandas as pd
 
-from model.dataset_details_printer import print_dataset_details
-from model.logistic_regression import LogisticRegressionModel
-from model.random_forest import RandomForestClassifierModel
-from model.decision_tree import DecisionTreeClassifierModel
-from model.knn import KNeighborsClassifierModel
+from models.dataset_details_printer import print_dataset_details
+from models.logistic_regression import LogisticRegressionModel
+from models.random_forest import RandomForestClassifierModel
+from models.decision_tree import DecisionTreeClassifierModel
+from models.knn import KNeighborsClassifierModel
 from sklearn.impute import SimpleImputer
 
 from datetime import datetime
 
-# From common includes
-from common.generic import printc
-from common.generic import pemji
+# From utils includes
+from utils.print_utils import printc
+from utils.print_utils import pemji
 
-DATA_DIR = 'data'
+DATA_DIR = '../../data'
 DATASET_DIR = 'big_data_zero_corr_enc'
 MODELS_DIR = 'model_checkpoints'
 

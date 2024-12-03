@@ -8,13 +8,12 @@ import numpy as np
 import pandas as pd
 from numpy.random import RandomState
 
-from common.name_utils import generate_short_uuid
-from lime_experiment.models import LimeExperimentConfig, LabelExplanationMetrics
 from lime.explanation import Explanation
 from lime.lime_tabular import LimeTabularExplainer
-from lime.metrics import calculate_stability
-
-from common.generic import printc, pemji
+from lime_experiment.metrics import calculate_stability
+from lime_experiment.models import LimeExperimentConfig, LabelExplanationMetrics
+from utils.print_utils import printc, pemji
+from utils.name_utils import generate_short_uuid
 
 RESULTS_OUTPUT_DIR = "./_experiment_results"
 RESULTS_FILE_NAME = "experiment_results.csv"
