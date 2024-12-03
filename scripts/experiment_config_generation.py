@@ -1,7 +1,7 @@
 import copy
 import json
 
-# Define the utils configuration for each experiment
+# Define the base configuration for each experiment
 base_experiment = {
     "model_path": "pick yours",  # Default model path
     "dataset_path": "./data/big_data_zero_corr_enc",
