@@ -31,7 +31,7 @@ class LogisticRegressionModel:
         self.test_output_path = f'{output_path}_test'
         self.val_output_path = f'{output_path}_val'
 
-    def train(self, train_x, train_y):
+    def train(self, train_x, train_y, val_x=None, val_y=None):
         self.model.fit(train_x, train_y)
 
     def evaluate(self, test_x, test_y, current_timestamp, is_test=True):
