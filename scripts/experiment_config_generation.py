@@ -1,7 +1,7 @@
 import copy
 import json
 
-# Define the common configuration for each experiment
+# Define the base configuration for each experiment
 base_experiment = {
     "model_path": "pick yours",  # Default model path
     "dataset_path": "./data/big_data_zero_corr_enc",
@@ -60,7 +60,7 @@ for config in sampling_configs:
 config = {"experiments": experiments}
 
 # Write to JSON file
-with open("experiments_config.json", "w") as f:
+with open("../experiments_config.json", "w") as f:
     json.dump(config, f, indent=4)
 
 print("Configuration file 'experiments_config.json' generated successfully.")

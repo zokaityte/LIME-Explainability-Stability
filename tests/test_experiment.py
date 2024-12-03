@@ -10,7 +10,7 @@ from lime_experiment.models import LimeExplainerConfig, LimeExperimentConfig
 class TestLimeExperiment(unittest.TestCase):
 
     def setUp(self):
-        """Setup common data for the test."""
+        """Setup utils data for the test."""
 
         # Convert relative paths to absolute paths
         model_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "./sample_dataset_1_rf_model.pkl"))
