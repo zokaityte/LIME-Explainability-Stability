@@ -20,7 +20,7 @@ def _jaccard_similarity(set1: Set, set2: Set) -> float:
     return intersection / union
 
 
-def _jaccard_similarities(list_of_lists_of_features: List[List]) -> np.ndarray:
+def jaccard_similarities(list_of_lists_of_features: List[List]) -> np.ndarray:
     """
     Computes the Jaccard similarity matrix for a list of feature sets.
 

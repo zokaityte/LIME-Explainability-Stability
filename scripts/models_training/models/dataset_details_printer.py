@@ -1,5 +1,5 @@
-from common.generic import printc
-from common.generic import pemji
+from utils.print_utils import printc
+from utils.print_utils import pemji
 
 
 def print_dataset_details(train_x, val_x, test_x, class_names, categorical_features):

@@ -12,8 +12,8 @@ import pydot
 from io import StringIO
 from PIL import Image
 
-from common.generic import printc
-from common.generic import pemji
+from utils.print_utils import printc
+from utils.print_utils import pemji
 
 
 class RandomForestClassifierModel:

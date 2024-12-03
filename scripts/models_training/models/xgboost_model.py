@@ -2,7 +2,7 @@ import csv
 import joblib
 import matplotlib.pyplot as plt
 import seaborn as sns
-from sklearn.tree import DecisionTreeClassifier
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import confusion_matrix, accuracy_score, precision_score, recall_score, f1_score
 import os
 import numpy as np
@@ -16,20 +16,21 @@ from utils.print_utils import printc
 from utils.print_utils import pemji
 
 
-class DecisionTreeClassifierModel:
+class RandomForestClassifierModel:
     def __init__(self, *args, **kwargs):
-        self.test_output_path = None
         self.val_output_path = None
+        self.test_output_path = None
+        self.output_path = None
         self.training_params = kwargs
-        self.model = DecisionTreeClassifier(*args, **kwargs)
+        self.model = RandomForestClassifier(*args, **kwargs)
 
     def generate_output_path(self, path):
         # Start the output path with the base path
-        output_path = f'{path}/dt/'
+        output_path = f'{path}/rf/'
         if not os.path.exists(output_path):
             os.makedirs(output_path)
 
-        #print(self.training_params)
+        # print(self.training_params)
         # Iterate over the kwargs and append them to the output path in the specified format
         for key, value in self.training_params.items():
             output_path += f'{key}_{value}'
@@ -48,19 +49,21 @@ class DecisionTreeClassifierModel:
         - tree_index: The index of the tree to visualize (default is 0).
         - filename: The name of the file to save the tree image (default is 'tree.png').
         """
-    
+
+        # Extract the tree from the Random Forest
+        tree = self.model.estimators_[tree_index]
         filename = f"{self.val_output_path}_tree.png"
 
         # Export tree to Graphviz dot format
         dot_data = StringIO()
-        export_graphviz(self.model, out_file=dot_data, filled=True, rounded=True,
+        export_graphviz(tree, out_file=dot_data, filled=True, rounded=True,
                         feature_names=train_features,  # Feature names for plotting
                         class_names=train_labels,  # Class names
                         special_characters=True)
-        
+
         # Use pydot to convert the dot file to an image
-        # (graph,) = pydot.graph_from_dot_data(dot_data.getvalue())
-        # graph.write_png(filename)
+        (graph,) = pydot.graph_from_dot_data(dot_data.getvalue())
+        graph.write_png(filename)
 
     def train(self, train_x, train_y):
         self.model.fit(train_x, train_y)
@@ -99,21 +102,13 @@ class DecisionTreeClassifierModel:
                                    macro_precision, macro_recall, macro_f1,
                                    cm, current_timestamp)
 
-        # Print the metrics for both weighted and non-weighted
-        printc(f"{pemji('rocket')} Trained DT metrics:\n"
-               f"Accuracy: {accuracy}, Weighted Accuracy: {weighted_accuracy}\n"
-               f"Weighted -> Precision: {weighted_precision}, Recall: {weighted_recall}, F1: {weighted_f1}\n"
-               f"Macro (Non-weighted) -> Precision: {macro_precision}, Recall: {macro_recall}, F1: {macro_f1}", 'v')
-
-        # Return all the metrics for further use
-        return accuracy, weighted_accuracy, weighted_precision, weighted_recall, weighted_f1, macro_precision, macro_recall, macro_f1, cm
-
     def save_confusion_matrix_image(self, cm, filename):
         # Normalize the confusion matrix (optional)
         cm_normalized = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]  # Normalize by row
 
         plt.figure(figsize=(12, 10))  # Increase the figure size for better spacing
-        sns.heatmap(cm_normalized, annot=True, fmt='.2f', cmap='Blues', annot_kws={"size": 8}, cbar=True)  # Add colorbar and increase font size
+        sns.heatmap(cm_normalized, annot=True, fmt='.2f', cmap='Blues', annot_kws={"size": 8},
+                    cbar=True)  # Add colorbar and increase font size
         plt.title('Confusion Matrix (Normalized)', fontsize=18)
         plt.xlabel('Predicted', fontsize=16)
         plt.ylabel('True', fontsize=16)
@@ -130,17 +125,22 @@ class DecisionTreeClassifierModel:
         plt.close()
 
     def export_metrics_to_csv(self, filename, suffix, accuracy, weighted_accuracy,
-                                   weighted_precision, weighted_recall, weighted_f1,
-                                   macro_precision, macro_recall, macro_f1,
-                                   cm, current_timestamp):
+                              weighted_precision, weighted_recall, weighted_f1,
+                              macro_precision, macro_recall, macro_f1,
+                              cm, current_timestamp):
         # Convert the training params to a string format
         params_str = '/'.join(f'{key}={value}' for key, value in self.training_params.items())
         delimiter = '/'
         # Create a list of metrics and confusion matrix values
         data = [
-            ["test/val", "Timestamp", "Training params", "Accuracy weighted", "Precision weighted", "Recall weighted", "F1 weighted", "Accuracy", "Precision", "Recall", "F1", "Confusion matrix"],
-            [suffix, current_timestamp, params_str, weighted_accuracy, weighted_precision, weighted_recall, weighted_f1, accuracy, macro_precision, macro_recall, macro_f1, delimiter.join(map(str, cm.tolist()))]
+            ["test/val", "Timestamp", "Training params", "Accuracy weighted", "Precision weighted", "Recall weighted",
+             "F1 weighted", "Accuracy", "Precision", "Recall", "F1", "Confusion matrix"],
+            [suffix, current_timestamp, params_str, weighted_accuracy, weighted_precision, weighted_recall, weighted_f1,
+             accuracy, macro_precision, macro_recall, macro_f1, delimiter.join(map(str, cm.tolist()))]
         ]
+        # To later readback conf matrix:
+        # df_read = pd.read_csv('metrics_and_confusion_matrix.csv', sep=',', header=None)
+        # parsed_cm = list(map(int, df_read['ConfusionMatrix'][0].split('/')))
 
         # Export to CSV
         with open(filename, mode='w', newline='') as file:

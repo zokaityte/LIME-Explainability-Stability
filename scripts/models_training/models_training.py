@@ -185,6 +185,9 @@ def train_knn(save_dir, train_x, val_x, test_x, train_y, val_y, test_y, current_
         
     merge_csv(csv_list, "knn")
 
+def train_xgbost(save_dir, train_x, val_x, test_x, train_y, val_y, test_y, current_timestamp):
+    raise NotImplementedError
+
 
 
 if __name__ == '__main__':
@@ -205,5 +208,6 @@ if __name__ == '__main__':
     # train model(s)
     # train_logistic_regression(checkpoint_dir, train_x_np, val_x_np, test_x_np, train_y, val_y, test_y, current_timestamp)
     # train_decision_tree(train_labels, train_features, checkpoint_dir, train_x_np, val_x_np, test_x_np, train_y, val_y, test_y, current_timestamp)
-    train_random_forest(train_labels, train_features, checkpoint_dir, train_x_np, val_x_np, test_x_np, train_y, val_y, test_y, current_timestamp)
+    # train_random_forest(train_labels, train_features, checkpoint_dir, train_x_np, val_x_np, test_x_np, train_y, val_y, test_y, current_timestamp)
     # train_knn(checkpoint_dir, train_x_np, val_x_np, test_x_np, train_y, val_y, test_y, current_timestamp)
+    train_xgbost(checkpoint_dir, train_x_np, val_x_np, test_x_np, train_y, val_y, test_y, current_timestamp)

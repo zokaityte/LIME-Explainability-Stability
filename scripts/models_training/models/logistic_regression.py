@@ -7,8 +7,8 @@ from sklearn.metrics import confusion_matrix, accuracy_score, precision_score, r
 import os
 import numpy as np
 
-from common.generic import printc
-from common.generic import pemji
+from utils.print_utils import printc
+from utils.print_utils import pemji
 
 
 class LogisticRegressionModel:
