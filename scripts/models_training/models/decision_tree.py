@@ -12,8 +12,8 @@ import pydot
 from io import StringIO
 from PIL import Image
 
-from common.generic import printc
-from common.generic import pemji
+from utils.print_utils import printc
+from utils.print_utils import pemji
 
 
 class DecisionTreeClassifierModel:
@@ -62,7 +62,7 @@ class DecisionTreeClassifierModel:
         # (graph,) = pydot.graph_from_dot_data(dot_data.getvalue())
         # graph.write_png(filename)
 
-    def train(self, train_x, train_y):
+    def train(self, train_x, train_y, val_x=None, val_y=None):
         self.model.fit(train_x, train_y)
 
     def evaluate(self, test_x, test_y, current_timestamp, is_test=True):

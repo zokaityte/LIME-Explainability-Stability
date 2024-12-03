@@ -7,8 +7,8 @@ from sklearn.metrics import confusion_matrix, accuracy_score, precision_score, r
 import os
 import numpy as np
 
-from common.generic import printc
-from common.generic import pemji
+from utils.print_utils import printc
+from utils.print_utils import pemji
 
 
 class LogisticRegressionModel:
@@ -31,7 +31,7 @@ class LogisticRegressionModel:
         self.test_output_path = f'{output_path}_test'
         self.val_output_path = f'{output_path}_val'
 
-    def train(self, train_x, train_y):
+    def train(self, train_x, train_y, val_x=None, val_y=None):
         self.model.fit(train_x, train_y)
 
     def evaluate(self, test_x, test_y, current_timestamp, is_test=True):

@@ -1,17 +1,19 @@
-import os.path
+import os
 import sys
-
+import itertools
 import numpy as np
 import pandas as pd
+
+from datetime import datetime
+from sklearn.impute import SimpleImputer
 
 from models.dataset_details_printer import print_dataset_details
 from models.logistic_regression import LogisticRegressionModel
 from models.random_forest import RandomForestClassifierModel
 from models.decision_tree import DecisionTreeClassifierModel
 from models.knn import KNeighborsClassifierModel
-from sklearn.impute import SimpleImputer
 
-from datetime import datetime
+from scripts.models_training.models.xgboost_model import XGBoostClassifierModel
 
 # From utils includes
 from utils.print_utils import printc
@@ -19,7 +21,7 @@ from utils.print_utils import pemji
 
 DATA_DIR = '../../data'
 DATASET_DIR = 'big_data_zero_corr_enc'
-MODELS_DIR = 'model_checkpoints'
+MODELS_DIR = '../../model_checkpoints'
 
 
 def load_data(print_details=False, encode_labels=True):
@@ -39,17 +41,17 @@ def load_data(print_details=False, encode_labels=True):
     val_x, val_y = val_data.drop(columns=['Label']), val_data['Label']
     test_x, test_y = test_data.drop(columns=['Label']), test_data['Label']
 
-    # float64 limit into nan
+    # Replace infinities with NaN
     train_x.replace([np.inf, -np.inf], np.nan, inplace=True)
     val_x.replace([np.inf, -np.inf], np.nan, inplace=True)
     test_x.replace([np.inf, -np.inf], np.nan, inplace=True)
 
-    # Nans as mean
+    # Impute missing values with mean
     imputer = SimpleImputer(strategy='mean')
     train_x = imputer.fit_transform(train_x)
     val_x = imputer.transform(val_x)
     test_x = imputer.transform(test_x)
-    printc(f"{pemji('')} Splitted X and Y!", 'b')
+    printc(f"{pemji('')} Split X and Y!", 'b')
 
     if print_details:
         print_dataset_details(train_x, val_x, test_x, [], [])
@@ -57,138 +59,65 @@ def load_data(print_details=False, encode_labels=True):
     return train_labels, train_features, train_x, val_x, test_x, train_y, val_y, test_y
 
 
-def merge_csv(csv_list, type):
+def merge_csv(csv_list, model_name):
     dataframes = []
     for file in csv_list:
         df = pd.read_csv(file)
         dataframes.append(df)
-    
+
     folder = os.path.dirname(csv_list[0])
-
     merged_df = pd.concat(dataframes, ignore_index=True)
-    merged_df.to_csv(f'{folder}/{type}_results.csv', index=False)
+    merged_df.to_csv(f'{folder}/{model_name}_results.csv', index=False)
 
 
-def train_random_forest(strain_labels, train_features, save_dir, train_x, val_x, test_x, train_y, val_y, test_y, current_timestamp):
+def train_model(model_class, model_name, train_labels, train_features, save_dir,
+                train_x, val_x, test_x, train_y, val_y, test_y, current_timestamp, hyperparameter_grid):
     csv_list = []
-    random_state = 42
-    n_estimators = [100, 200, 300]
-    max_depth = [None, 10, 20, 30]
-    min_samples_split = [2, 10, 20]
-    min_samples_leaf = [1, 5, 10]
-    max_features = ['sqrt', 'log2']
 
-    for n in n_estimators:
-        for depth in max_depth:
-            for split in min_samples_split:
-                for leaf in min_samples_leaf:
-                    for feature in max_features:
-                        printc(f"{pemji('hourglass')} Training RF of parameters: n_estimators: {n}, max_depth: {depth}, min_samples_split: {split}, min_samples_leaf: {leaf} max_features: {feature}", 'b')
-                        model = RandomForestClassifierModel(n_estimators=n, random_state=random_state, min_samples_split=split, max_depth=depth, max_features=feature, n_jobs=os.cpu_count(), min_samples_leaf=leaf)
+    # Generate all combinations of hyperparameters
+    param_names = list(hyperparameter_grid.keys())
+    param_values = list(hyperparameter_grid.values())
 
-                        model.generate_output_path(save_dir)
-                        model.train(train_x, train_y)
-                        printc(f"{pemji('check_mark')} Training RF of parameters: n_estimators: {n}, max_depth: {depth}, min_samples_split: {split}, min_samples_leaf: {leaf} max_features: {feature}", 'g')
+    for param_combination in itertools.product(*param_values):
+        # Build a dictionary of current parameters
+        params = dict(zip(param_names, param_combination))
 
-                        # test evaluation
-                        model.evaluate(test_x, test_y, current_timestamp)
-                        csv_list.append(f"{model.test_output_path}.csv")
+        # Print parameters
+        param_str = ', '.join(f"{k}: {v}" for k, v in params.items())
+        printc(f"{pemji('hourglass')} Training {model_name.upper()} with parameters: {param_str}", 'b')
 
-                        # val evaluation
-                        model.evaluate(val_x, val_y, current_timestamp, is_test=False)
-                        csv_list.append(f"{model.val_output_path}.csv")
+        # Instantiate model
+        model = model_class(**params)
 
-                        model.save()
-                        model.save_tree_image(strain_labels, train_features, train_x, train_y)
-                        printc(f"{pemji('download')} Saved RF of parameters: n_estimators: {n}, max_depth: {depth}, min_samples_split: {split}, min_samples_leaf: {leaf} max_features: {feature}", 'g')
-
-    merge_csv(csv_list, "rf")
-
-
-def train_logistic_regression(save_dir, train_x, val_x, test_x, train_y, val_y, test_y, current_timestamp):
-    csv_list = []
-    printc(f"{pemji('hourglass')} Training regression", 'b')
-    # penalty {‘l1’, ‘l2’, ‘elasticnet’, None}, default=’l2’
-    model = LogisticRegressionModel(penalty='l2')
-
-    model.generate_output_path(save_dir)
-    model.train(train_x, train_y)
-    printc(f"{pemji('check_mark')} Trained regression", 'g')
-
-    # test evaluation
-    model.evaluate(test_x, test_y, current_timestamp)
-    csv_list.append(f"{model.test_output_path}.csv")
-
-    # val evaluation
-    model.evaluate(val_x, val_y, current_timestamp, is_test=False)
-    csv_list.append(f"{model.val_output_path}.csv")
-
-    model.save()
-    printc(f"{pemji('download')} Saved regression", 'g')
-    merge_csv(csv_list, "logreg")
-
-
-def train_decision_tree(train_labels, train_features, save_dir, train_x, val_x, test_x, train_y, val_y, test_y, current_timestamp):
-    csv_list = []
-    for i in range(3,7):
-        random_state=i
-        max_depth=i
-        max_features=i
-
-        printc(f"{pemji('hourglass')} Training DF of parameters: random_state: {random_state}, max_depth: {max_depth}, max_features: {max_features}", 'b')
-        model = DecisionTreeClassifierModel(random_state=random_state, max_depth=max_depth, max_features=max_features)
-
+        # Generate output paths for saving results
         model.generate_output_path(save_dir)
-        model.train(train_x, train_y)
-        printc(f"{pemji('check_mark')} Trained DF of parameters: random_state: {random_state}, max_depth: {max_depth}, max_features: {max_features}", 'g')
 
-        # test evaluation
+        # Train the model
+        model.train(train_x, train_y, val_x, val_y)
+        printc(f"{pemji('check_mark')} Trained {model_name.upper()} with parameters: {param_str}", 'g')
+
+        # Evaluate on test set
         model.evaluate(test_x, test_y, current_timestamp)
         csv_list.append(f"{model.test_output_path}.csv")
 
-        # val evaluation
-        model.evaluate(val_x, val_y, current_timestamp, is_test=False)
-        csv_list.append(f"{model.val_output_path}.csv")
-        model.save()
-
-        # Save tree png
-        model.save_tree_image(train_labels, train_features, train_x, train_y)
-        printc(f"{pemji('download')} Saved DF of parameters: random_state: {random_state}, max_depth: {max_depth}, max_features: {max_features}; to: {save_dir}", 'g')
-        
-    merge_csv(csv_list, "dt")
-
-
-def train_knn(save_dir, train_x, val_x, test_x, train_y, val_y, test_y, current_timestamp):
-    csv_list = []
-    for i in range(3,7):
-        n_neighbors=i
-        weights='uniform' #{‘uniform’, ‘distance’}
-        algorithm='auto' #{‘auto’, ‘ball_tree’, ‘kd_tree’, ‘brute’}, default =’auto’
-
-        printc(f"{pemji('hourglass')} Training KNN of parameters: n_neighbors: {n_neighbors}, weights: {weights}, algorithm: {algorithm}", 'b')
-        model = KNeighborsClassifierModel(n_neighbors=n_neighbors, weights=weights, algorithm=algorithm, n_jobs=os.cpu_count())
-
-        model.generate_output_path(save_dir)
-        model.train(train_x, train_y)
-        printc(f"{pemji('check_mark')} Trained KNN of parameters: n_neighbors: {n_neighbors}, weights: {weights}, algorithm: {algorithm}", 'g')
-
-        # test evaluation
-        model.evaluate(test_x, test_y, current_timestamp)
-        csv_list.append(f"{model.test_output_path}.csv")
-
-        # val evaluation
+        # Evaluate on validation set
         model.evaluate(val_x, val_y, current_timestamp, is_test=False)
         csv_list.append(f"{model.val_output_path}.csv")
 
+        # Save the model and tree image if applicable
         model.save()
-        printc(f"{pemji('download')} Saved KNN of parameters: n_neighbors: {n_neighbors}, weights: {weights}, algorithm: {algorithm}; to: {save_dir}", 'g')
-        
-    merge_csv(csv_list, "knn")
+        try:
+            model.save_tree_image(train_labels, train_features, train_x, train_y)
+        except Exception as e:
+            printc(f"{pemji('warning')} Could not save tree image due to: {e}", 'r')
+        printc(f"{pemji('download')} Saved {model_name.upper()} model with parameters: {param_str}; to: {save_dir}", 'g')
 
+    # Merge all CSV files generated during evaluation
+    merge_csv(csv_list, model_name)
 
 
 if __name__ == '__main__':
-    # create missing dirs
+    # Create missing directories
     if not os.path.exists(MODELS_DIR):
         os.makedirs(MODELS_DIR)
 
@@ -197,13 +126,58 @@ if __name__ == '__main__':
     if not os.path.exists(checkpoint_dir):
         os.makedirs(checkpoint_dir)
 
-    # loda data
+    # Load data
     train_labels, train_features, train_x_np, val_x_np, test_x_np, train_y, val_y, test_y = load_data(False, False)
 
     current_timestamp = datetime.now().strftime('%Y-%m-%d-%H:%M')
 
-    # train model(s)
-    # train_logistic_regression(checkpoint_dir, train_x_np, val_x_np, test_x_np, train_y, val_y, test_y, current_timestamp)
-    # train_decision_tree(train_labels, train_features, checkpoint_dir, train_x_np, val_x_np, test_x_np, train_y, val_y, test_y, current_timestamp)
-    train_random_forest(train_labels, train_features, checkpoint_dir, train_x_np, val_x_np, test_x_np, train_y, val_y, test_y, current_timestamp)
-    # train_knn(checkpoint_dir, train_x_np, val_x_np, test_x_np, train_y, val_y, test_y, current_timestamp)
+    # Define hyperparameter grids for each model
+    hyperparameter_grid_rf = {
+        'n_estimators': [100, 200, 300],
+        'max_depth': [None, 10, 20, 30],
+        'min_samples_split': [2, 10, 20],
+        'min_samples_leaf': [1, 5, 10],
+        'max_features': ['sqrt', 'log2'],
+        'random_state': [42],
+        'n_jobs': [os.cpu_count()]
+    }
+
+    hyperparameter_grid_xgb = {
+        'n_estimators': [100, 200],  # Number of trees
+        'max_depth': [3, 6],  # Tree depth (controls complexity)
+        'learning_rate': [0.05, 0.1],  # Step size shrinkage
+        'subsample': [0.8],  # Row subsampling (stabilizes training)
+        'colsample_bytree': [0.8],  # Feature subsampling
+        'min_child_weight': [1, 3],  # Minimum sum of instance weights
+        'use_label_encoder': [False],
+    }
+
+    hyperparameter_grid_dt = {
+        'random_state': [3],
+        'max_depth': [3],
+        'max_features': [3]
+    }
+
+    hyperparameter_grid_knn = {
+        'n_neighbors': list(range(3, 7)),
+        'weights': ['uniform'],  # Options: 'uniform', 'distance'
+        'algorithm': ['auto'],   # Options: 'auto', 'ball_tree', 'kd_tree', 'brute'
+        'n_jobs': [os.cpu_count()]
+    }
+
+    # Train models
+    # Example for Random Forest
+    # train_model(RandomForestClassifierModel, 'rf', train_labels, train_features, checkpoint_dir,
+    #             train_x_np, val_x_np, test_x_np, train_y, val_y, test_y, current_timestamp, hyperparameter_grid_rf)
+
+    # Example for XGBoost
+    train_model(XGBoostClassifierModel, 'xgboost', train_labels, train_features, checkpoint_dir,
+                train_x_np, val_x_np, test_x_np, train_y, val_y, test_y, current_timestamp, hyperparameter_grid_xgb)
+
+    # Example for Decision Tree
+    # train_model(DecisionTreeClassifierModel, 'dt', train_labels, train_features, checkpoint_dir,
+    #             train_x_np, val_x_np, test_x_np, train_y, val_y, test_y, current_timestamp, hyperparameter_grid_dt)
+
+    # Example for K-Nearest Neighbors
+    # train_model(KNeighborsClassifierModel, 'knn', train_labels, train_features, checkpoint_dir,
+    #             train_x_np, val_x_np, test_x_np, train_y, val_y, test_y, current_timestamp, hyperparameter_grid_knn)

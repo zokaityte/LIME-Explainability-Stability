@@ -27,7 +27,7 @@ class LinearRegressionModel:
 
         self.output_path = output_path
 
-    def train(self, train_x, train_y):
+    def train(self, train_x, train_y, val_x=None, val_y=None):
         self.model.fit(train_x, train_y)
 
     def evaluate(self, test_x, test_y, current_timestamp):

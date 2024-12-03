@@ -20,7 +20,7 @@ def _jaccard_similarity(set1: Set, set2: Set) -> float:
     return intersection / union
 
 
-def _jaccard_similarities(list_of_lists_of_features: List[List]) -> np.ndarray:
+def jaccard_similarities(list_of_lists_of_features: List[List]) -> np.ndarray:
     """
     Computes the Jaccard similarity matrix for a list of feature sets.
 
@@ -56,6 +56,6 @@ def calculate_stability(list_of_lists_of_features: List[List]) -> float:
     Returns:
     float: The mean Jaccard similarity of all distinct pairwise comparisons.
     """
-    sim_matrix = _jaccard_similarities(list_of_lists_of_features)
+    sim_matrix = jaccard_similarities(list_of_lists_of_features)
     # Calculate the mean of all similarity scores in the upper triangle
     return np.mean(sim_matrix[np.triu_indices(len(sim_matrix), 1)])
