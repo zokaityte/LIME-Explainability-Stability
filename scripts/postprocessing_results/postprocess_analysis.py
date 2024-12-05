@@ -1,98 +1,14 @@
-# import ast
-# import numpy as np
-# import pandas as pd
-# import seaborn as sns
-# from matplotlib import pyplot as plt
-# from lime_experiment.metrics import jaccard_similarities
-#
-#
-# def extract_explanations(df: pd.DataFrame) -> pd.DataFrame:
-#     """Processes the dataframe to extract feature lists from the 'results' column."""
-#     df["results"] = df["results"].apply(lambda x: ast.literal_eval(x))
-#     df["feature_list"] = df["results"].apply(lambda x: [item[0].strip() for item in x])
-#     return df
-#
-#
-# def calculate_avg_similarity_matrix(df: pd.DataFrame) -> np.ndarray:
-#     """Computes the average Jaccard similarity matrix across all labels."""
-#     df = extract_explanations(df)
-#     all_similarity_matrices = []
-#
-#     for label in df.explained_label.unique():
-#         label_df = df[df.explained_label == label]
-#         feature_lists = label_df.feature_list.tolist()
-#         similarity_matrix = jaccard_similarities(feature_lists)
-#         all_similarity_matrices.append(similarity_matrix)
-#
-#     # Combine and compute the average similarity matrix
-#     combined_matrices = np.stack(all_similarity_matrices, axis=-1)
-#     avg_matrix = np.mean(combined_matrices, axis=-1)
-#     return avg_matrix
-#
-#
-# def visualize_multiple_similarity_matrices(matrices: list, titles: list):
-#     """Visualizes multiple similarity matrices in a grid layout."""
-#     n = len(matrices)
-#     cols = 5  # Display 5 graphs in one row
-#     fig, axes = plt.subplots(1, cols, figsize=(5 * cols, 8), constrained_layout=True)
-#
-#     for i, (matrix, title) in enumerate(zip(matrices, titles)):
-#         # Create a mask for the upper triangle
-#         mask = np.triu(np.ones_like(matrix, dtype=bool), k=1)
-#         sns.heatmap(
-#             matrix,
-#             mask=mask,
-#             annot=False,
-#             fmt=".2f",
-#             cmap="Blues",
-#             vmin=0,
-#             vmax=1,
-#             cbar=(i == cols // 2),  # Show colorbar only for the middle graph
-#             cbar_kws={'label': "Jaccard Similarity"} if (i == cols // 2) else None,
-#             ax=axes[i]
-#         )
-#         axes[i].set_title(title)
-#         axes[i].set_xlabel("Iteration")
-#         axes[i].set_ylabel("Iteration" if i == 0 else "")  # Y-axis only on the first graph
-#         axes[i].tick_params(axis='y', rotation=0)
-#
-#     plt.suptitle("Comparison of Average Similarity Matrices", fontsize=16)
-#     plt.show()
-#
-#
-# if __name__ == "__main__":
-#     # Load datasets
-#     gaussian_df = pd.read_csv("explanations_gaussian_dd8a5065.csv")
-#     pareto_df = pd.read_csv("explanations_pareto_f1719849.csv")
-#     gamma_df = pd.read_csv("explanations_gamma.csv")
-#     beta_df = pd.read_csv("explanations_beta.csv")
-#     weibull_df = pd.read_csv("explanations_weibull.csv")
-#
-#     # Calculate similarity matrices
-#     gaussian_avg_matrix = calculate_avg_similarity_matrix(gaussian_df)
-#     pareto_avg_matrix = calculate_avg_similarity_matrix(pareto_df)
-#     gamma_avg_matrix = calculate_avg_similarity_matrix(gamma_df)
-#     beta_avg_matrix = calculate_avg_similarity_matrix(beta_df)
-#     weibull_avg_matrix = calculate_avg_similarity_matrix(weibull_df)
-#
-#     # Visualize all matrices
-#     visualize_multiple_similarity_matrices(
-#         [gaussian_avg_matrix, pareto_avg_matrix, gamma_avg_matrix, beta_avg_matrix, weibull_avg_matrix],
-#         ["Gaussian", "Pareto", "Gamma", "Beta", "Weibull"]
-#     )
+import ast
 import os
 
-from rootutils import rootutils
-
-rootutils.setup_root(__file__, indicator=['pyproject.toml'], pythonpath=True)
-
-import ast
 import numpy as np
 import pandas as pd
 import seaborn as sns
 from matplotlib import pyplot as plt
+
 from lime_experiment.metrics import jaccard_similarities
 
+plt.style.use("ggplot")
 
 def extract_explanations(df: pd.DataFrame) -> pd.DataFrame:
     """Processes the dataframe to extract feature lists and explanation scores from the 'results' column."""
@@ -147,18 +63,31 @@ def plot_explanation_features(feature_scores: list, title: str, ax, highlight_la
     # Reverse the order of the features
     df_features = df_features.iloc[::-1]
 
-    # Assign default colors (green for positive, red for negative)
-    colors = df_features['Score'].apply(lambda x: 'green' if x > 0 else 'red')
+    # Extract ggplot colors
+    ggplot_colors = plt.rcParams['axes.prop_cycle'].by_key()['color']
+    green_color = ggplot_colors[5]  # ggplot green
+    red_color = ggplot_colors[0]  # ggplot red
+
+    # Assign colors based on the score
+    colors = df_features['Score'].apply(lambda x: green_color if x > 0 else red_color)
 
     # Plot the horizontal bar chart
     ax.barh(
         y=df_features['Feature'],
         width=df_features['Score'],
         color=colors,
-        height=0.9  # Reduce bar spacing by setting height closer to 1
+        height=0.9# Reduce bar spacing by setting height closer to 1
     )
 
-    # Highlight labels on the y-axis with background colors
+    # Set background to white
+    ax.set_facecolor("white")
+
+    # Add a box around the axis by making spines visible
+    for spine in ax.spines.values():
+        spine.set_visible(True)  # Ensure the spine is visible
+        spine.set_color(ax.xaxis.label.get_color())  # Set box color to black
+
+          # Highlight labels on the y-axis with background colors
     for tick_label in ax.get_yticklabels():
         label_text = tick_label.get_text()
         if highlight_labels and label_text in highlight_labels:
@@ -176,7 +105,7 @@ def plot_explanation_features(feature_scores: list, title: str, ax, highlight_la
 
 
 def visualize_summary(df: pd.DataFrame, avg_matrix: np.ndarray, name: str):
-    """Creates a 3-row plot: iteration 1 features, iteration 2 features, average similarity matrix."""
+    """Creates a layout with iteration bar charts on the left and similarity matrix on the right."""
     # Ensure explanations are extracted
     df = extract_explanations(df)
 
@@ -203,24 +132,22 @@ def visualize_summary(df: pd.DataFrame, avg_matrix: np.ndarray, name: str):
     unique_to_iteration1_list = list(unique_to_iteration1)
     unique_to_iteration2_list = list(unique_to_iteration2)
 
-    # Create the figure with a 3-row grid, adjusting heights and widths
-    from matplotlib import gridspec
+    # Create the figure with a custom layout
+    fig = plt.figure(figsize=(12, 6))
+    gs = fig.add_gridspec(2, 2, width_ratios=[1, 2], height_ratios=[0.5, 0.5])
 
-    fig = plt.figure(figsize=(10, 15))
-    gs = gridspec.GridSpec(3, 2, width_ratios=[0.05, 0.95], height_ratios=[0.75, 0.75, 2], wspace=0.25, hspace=0.25)
 
-    # Axes for the bar charts
-    axes_iteration1 = fig.add_subplot(gs[0, 1])
-    axes_iteration2 = fig.add_subplot(gs[1, 1])
+    # Axes for bar charts (left side)
+    axes_iteration1 = fig.add_subplot(gs[0, 0])  # Top-left
+    axes_iteration2 = fig.add_subplot(gs[1, 0])  # Bottom-left
 
-    # Axes for heatmap and its color bar
-    axes_heatmap = fig.add_subplot(gs[2, 1])
-    cbar_ax = fig.add_subplot(gs[2, 0])
+    # Axis for similarity matrix (right side)
+    axes_heatmap = fig.add_subplot(gs[:, 1])  # Spanning both rows on the right
 
     # Plot first iteration features with highlights
     plot_explanation_features(
         iteration1_features_scores,
-        "Local explanation for class Benign (run=0)",
+        "Local explanation \n for class Benign (run=0)",
         axes_iteration1,
         highlight_labels=unique_to_iteration1_list
     )
@@ -228,7 +155,7 @@ def visualize_summary(df: pd.DataFrame, avg_matrix: np.ndarray, name: str):
     # Plot second iteration features with highlights
     plot_explanation_features(
         iteration2_features_scores,
-        "Local explanation for class Benign (run=1)",
+        "Local explanation \n for class Benign (run=1)",
         axes_iteration2,
         highlight_labels=unique_to_iteration2_list
     )
@@ -245,16 +172,17 @@ def visualize_summary(df: pd.DataFrame, avg_matrix: np.ndarray, name: str):
         vmax=1,
         cbar=True,
         ax=axes_heatmap,
-        cbar_ax=cbar_ax,  # Specify the color bar axis
         cbar_kws={'label': "Jaccard Similarity"}
     )
     axes_heatmap.set_title("Average Similarity Matrix")
-    cbar_ax.yaxis.set_label_position("left")
-    cbar_ax.yaxis.tick_left()
+    axes_heatmap.set_facecolor("white")
 
+    # Adjust layout
     plt.suptitle(name, fontsize=16)
-    plt.show()
+    plt.tight_layout()
     plt.savefig(name + ".png")
+    plt.show()
+
 
 
 
