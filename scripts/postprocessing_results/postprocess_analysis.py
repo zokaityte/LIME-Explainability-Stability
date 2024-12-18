@@ -1,5 +1,4 @@
 import ast
-import os
 
 import numpy as np
 import pandas as pd
@@ -12,16 +11,12 @@ plt.style.use("ggplot")
 
 def extract_explanations(df: pd.DataFrame) -> pd.DataFrame:
     """Processes the dataframe to extract feature lists and explanation scores from the 'results' column."""
-    # Check and parse the 'results' column only if necessary
     df["results"] = df["results"].apply(
         lambda x: ast.literal_eval(x) if isinstance(x, str) else x
     )
-    # Extract feature names for similarity matrix computation
     df["feature_list"] = df["results"].apply(lambda x: [item[0].strip() for item in x])
-    # Extract feature names and scores for plotting
     df["feature_scores"] = df["results"].apply(lambda x: [(item[0].strip(), item[1]) for item in x])
     return df
-
 
 
 def calculate_avg_similarity_matrix(df: pd.DataFrame) -> np.ndarray:
@@ -33,15 +28,8 @@ def calculate_avg_similarity_matrix(df: pd.DataFrame) -> np.ndarray:
         label_df = df[df.explained_label == label]
         feature_lists = label_df.feature_list.tolist()
         similarity_matrix = jaccard_similarities(feature_lists)
-
-        #print first and second iteration and its pairwise score
-        print("Label: ",label, "first iteration", label_df.results.iloc[0])
-        print("Label: ", label, "second iteration", label_df.results.iloc[1])
-        print("Jaccard Similarity: ", similarity_matrix[0, 1])
-
         all_similarity_matrices.append(similarity_matrix)
 
-    # Combine and compute the average similarity matrix
     combined_matrices = np.stack(all_similarity_matrices, axis=-1)
     avg_matrix = np.mean(combined_matrices, axis=-1)
     return avg_matrix
@@ -58,9 +46,7 @@ def plot_explanation_features(feature_scores: list, title: str, ax, highlight_la
         highlight_labels (list, optional): List of feature labels to highlight. Defaults to None.
         bg_color (str, optional): Background color for highlighted tick labels. Defaults to "lightblue".
     """
-    # Convert the list of tuples into a DataFrame
     df_features = pd.DataFrame(feature_scores, columns=['Feature', 'Score'])
-    # Reverse the order of the features
     df_features = df_features.iloc[::-1]
 
     # Extract ggplot colors
@@ -79,15 +65,13 @@ def plot_explanation_features(feature_scores: list, title: str, ax, highlight_la
         height=0.9# Reduce bar spacing by setting height closer to 1
     )
 
-    # Set background to white
+    # Formatting
     ax.set_facecolor("white")
-
-    # Add a box around the axis by making spines visible
     for spine in ax.spines.values():
-        spine.set_visible(True)  # Ensure the spine is visible
+        spine.set_visible(True)
         spine.set_color(ax.xaxis.label.get_color())  # Set box color to black
 
-          # Highlight labels on the y-axis with background colors
+    # Highlight labels on the y-axis with background colors
     for tick_label in ax.get_yticklabels():
         label_text = tick_label.get_text()
         if highlight_labels and label_text in highlight_labels:
@@ -95,13 +79,7 @@ def plot_explanation_features(feature_scores: list, title: str, ax, highlight_la
             tick_label.set_fontweight('bold')  # Bold text
             tick_label.set_bbox(dict(facecolor=bg_color, edgecolor='none', boxstyle='round,pad=0.3'))
 
-    # Configure chart details
     ax.set_title(title)
-
-
-
-# Optionally remove gridlines for a cleaner look
-
 
 
 def visualize_summary(df: pd.DataFrame, avg_matrix: np.ndarray, name: str):
@@ -135,7 +113,6 @@ def visualize_summary(df: pd.DataFrame, avg_matrix: np.ndarray, name: str):
     # Create the figure with a custom layout
     fig = plt.figure(figsize=(12, 6))
     gs = fig.add_gridspec(2, 2, width_ratios=[1, 2], height_ratios=[0.5, 0.5])
-
 
     # Axes for bar charts (left side)
     axes_iteration1 = fig.add_subplot(gs[0, 0])  # Top-left
@@ -184,12 +161,7 @@ def visualize_summary(df: pd.DataFrame, avg_matrix: np.ndarray, name: str):
     plt.show()
 
 
-
-
-
-
 if __name__ == "__main__":
-    # List of CSV file names
     csv_files = [
         "exp_DecisionTreeClassifier_gaussian_dd8a5065.csv",
         "exp_DecisionTreeClassifier_beta_f809c4d6.csv",
@@ -198,14 +170,7 @@ if __name__ == "__main__":
         "exp_DecisionTreeClassifier_weibull_eb69266e.csv"
     ]
 
-    print(os.getcwd())
-
     for csv_file in csv_files:
-        # Load the dataset
         df = pd.read_csv(csv_file)
-
-        # Calculate the average similarity matrix
         avg_matrix = calculate_avg_similarity_matrix(df)
-
-        # Visualize summary
         visualize_summary(df, avg_matrix, csv_file)
