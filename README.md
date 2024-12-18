@@ -1,6 +1,6 @@
 # LIME Explainability Stability
 
-Exploring perturbation stategies to improve explainability stability
+Exploring perturbation stategies to improve explainability stability.
 
 Lime implementation based on: https://github.com/marcotcr/lime
 
@@ -49,4 +49,3 @@ Sample `experiments_config.json`:
 ### Running tests
 1. Run tests with:
 `python -m unittest discover -s tests`
-```
