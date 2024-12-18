@@ -1,7 +1,5 @@
 import os
 import random
-import numpy as np
-from sklearn.impute import SimpleImputer
 
 import pandas as pd
 
@@ -23,16 +21,8 @@ class ExperimentData:
         self._categorical_names = None
 
     def get_training_data(self):
-
-        # float64 limit into nan
         train_data = pd.read_csv(self._train_data_csv_path, engine="pyarrow", usecols=self._column_names[:-1])
-        train_data.replace([np.inf, -np.inf], np.nan, inplace=True)
-
-        # Nans as mean
-        imputer = SimpleImputer(strategy='mean')
-        train_data = imputer.fit_transform(train_data)
-
-        return train_data
+        return train_data.to_numpy()
 
     def get_training_labels(self):
         return pd.read_csv(self._train_data_csv_path, engine="pyarrow", usecols=[self._column_names[-1]]).to_numpy()
@@ -43,30 +33,25 @@ class ExperimentData:
             random.seed(random_seed)
 
         test_data = pd.read_csv(self._test_data_csv_path, engine="pyarrow")
-        test_data.replace([np.inf, -np.inf], np.nan, inplace=True)
-
-        # Impute NaNs with the mean
-        imputer = SimpleImputer(strategy='mean')
-        test_data_imputed = imputer.fit_transform(test_data)
 
         # Filter by class label
         if class_label is not None:
 
             # Check if the class label exists in the dataset
-            if class_label not in test_data_imputed[:, -1]:
+            if class_label not in test_data[:, -1]:
                 raise ValueError(f"The class label {class_label} does not exist in the dataset.")
 
-            test_data_imputed = test_data_imputed[test_data_imputed[:, -1] == class_label]
+            test_data = test_data[test_data[:, -1] == class_label]
 
         # Select a random row index
-        random_row_index = random.randint(0, test_data_imputed.shape[0])
+        random_row_index = random.randint(0, test_data.shape[0])
         self.random_test_row_index = random_row_index
-        self.random_test_row_label = test_data_imputed[random_row_index, -1]
+        self.random_test_row_label = test_data.iloc[random_row_index, -1]
 
         # Select the features of the random row
-        random_row_features = test_data_imputed[random_row_index, :-1].reshape(1, -1).flatten()
-
-        return random_row_features
+        random_row_features = test_data.iloc[random_row_index, :-1]
+        random_row_features_numpy = random_row_features.to_numpy().flatten()
+        return random_row_features_numpy
 
     def get_num_classes(self):
         return len(self._label_names)

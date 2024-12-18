@@ -17,8 +17,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../utils')))
 
 # From common includes
-from generic import printc
-from generic import pemji
+from utils.print_utils import printc, pemji
 
 
 def __spearman_corr_fast(x, y):
