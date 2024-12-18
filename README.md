@@ -1,5 +1,7 @@
 # LIME Explainability Stability
 
+Exploring perturbation stategies to improve explainability stability
+
 Lime implementation based on: https://github.com/marcotcr/lime
 
 ### Setup
