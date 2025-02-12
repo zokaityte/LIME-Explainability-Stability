@@ -1,5 +1,8 @@
+import rootutils
+
+rootutils.setup_root(__file__, indicator=".git", pythonpath=True)
+
 import os
-import sys
 import itertools
 import numpy as np
 import pandas as pd
@@ -15,13 +18,12 @@ from models.knn import KNeighborsClassifierModel
 from scripts.models_training.models.catboost_model import CatBoostClassifierModel
 from scripts.models_training.models.xgboost_model import XGBoostClassifierModel
 
-# From utils includes
 from utils.print_utils import printc
 from utils.print_utils import pemji
 
-DATA_DIR = '../../data'
+DATA_DIR = 'data'
 DATASET_DIR = 'big_data_zero_corr_enc'
-MODELS_DIR = '../../model_checkpoints'
+MODELS_DIR = 'model_checkpoints'
 
 
 def load_data(print_details=False, encode_labels=True):
