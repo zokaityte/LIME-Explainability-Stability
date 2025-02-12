@@ -24,34 +24,48 @@ class ExperimentData:
         train_data = pd.read_csv(self._train_data_csv_path, engine="pyarrow", usecols=self._column_names[:-1])
         return train_data.to_numpy()
 
+    def get_test_data(self):
+        test_data = pd.read_csv(self._test_data_csv_path, engine="pyarrow", usecols=self._column_names[:-1])
+        return test_data.to_numpy()
+
+    def get_test_labels(self):
+        return pd.read_csv(self._test_data_csv_path, engine="pyarrow", usecols=[self._column_names[-1]]).to_numpy()
+
     def get_training_labels(self):
         return pd.read_csv(self._train_data_csv_path, engine="pyarrow", usecols=[self._column_names[-1]]).to_numpy()
 
-    def get_random_test_instance(self, random_seed, class_label):
+    def get_random_test_instance(self, random_seed, class_label=None):
         # Set the random seed for reproducibility
         if random_seed is not None:
             random.seed(random_seed)
 
-        test_data = pd.read_csv(self._test_data_csv_path, engine="pyarrow")
+        test_x = self.get_test_data()
+        test_y = self.get_test_labels().flatten()
+
+        test_df = pd.DataFrame(test_x)
+        test_df["original_index"] = test_df.index
+        test_df["label"] = test_y
+
 
         # Filter by class label
         if class_label is not None:
 
             # Check if the class label exists in the dataset
-            if class_label not in test_data[:, -1]:
-                raise ValueError(f"The class label {class_label} does not exist in the dataset.")
+            if class_label not in test_df["label"].unique():
+                raise ValueError(f"The class label {class_label} does not exist in the test dataset.")
 
-            test_data = test_data[test_data[:, -1] == class_label]
+            # Filter the dataset by the class label
+            test_df = test_df[test_df["label"] == class_label]
 
         # Select a random row index
-        random_row_index = random.randint(0, test_data.shape[0])
-        self.random_test_row_index = random_row_index
-        self.random_test_row_label = test_data.iloc[random_row_index, -1]
+        random_row = random.randint(0, test_df.shape[0])
+        # TODO: Fix the index row
+        self.random_test_row_index = random_row # test_df.iloc[random_row]["original_index"]
+        self.random_test_row_label = test_df.iloc[random_row]["label"]
+        random_test_row_features = test_df.iloc[random_row].drop(["original_index", "label"]).to_numpy()
 
         # Select the features of the random row
-        random_row_features = test_data.iloc[random_row_index, :-1]
-        random_row_features_numpy = random_row_features.to_numpy().flatten()
-        return random_row_features_numpy
+        return random_test_row_features
 
     def get_num_classes(self):
         return len(self._label_names)

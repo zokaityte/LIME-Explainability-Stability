@@ -13,8 +13,8 @@ class TestLimeExperiment(unittest.TestCase):
         """Setup utils data for the test."""
 
         # Convert relative paths to absolute paths
-        model_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "./sample_dataset_1_rf_model.pkl"))
-        dataset_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../data/sample_dataset_1"))
+        model_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "./resources/sample_dataset_1_rf_model.pkl"))
+        dataset_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "./resources/sample_dataset_1"))
 
         self.random_seed = 42  # Or None
         self.explained_model = ExplainedModel(model_path)

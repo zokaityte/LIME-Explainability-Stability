@@ -24,8 +24,8 @@ Sample `experiments_config.json`:
 {
   "experiments": [
         {
-      "model_path": "./tests/sample_dataset_1_rf_model.pkl",
-      "dataset_path": "./datasets/sample_dataset_1",
+      "model_path": "./tests/resources/sample_dataset_1_rf_model.pkl",
+      "dataset_path": "./tests/resources/sample_dataset_1",
       "label_names": ["Benign", "FTP-BruteForce", "SSH-Bruteforce"],
       "categorical_columns_names": ["Fwd PSH Flags", "FIN Flag Cnt", "SYN Flag Cnt", "RST Flag Cnt", "PSH Flag Cnt", "ACK Flag Cnt", "URG Flag Cnt", "ECE Flag Cnt"],
       "explainer_config": {
