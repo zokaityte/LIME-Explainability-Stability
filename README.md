@@ -14,8 +14,8 @@ pip install -r requirements.txt
 
 ### Running experiment
 
-1. Add datasets to `datasets` folder, containing `train.csv`, `val.csv` and `test.csv` files.
-2. Add scikit-learn classifier model as `.pkl` file, trained on dataset. Model can be trained using `scripts/models_training/models_training.py` 
+1. Prepare dataset folder, containing `train.csv`, `val.csv` and `test.csv` files, label being the last column.
+2. Prepare scikit-learn classifier model as `.pkl` file, trained on dataset. Model can be trained using `scripts/models_training/models_training.py` 
 3. Adjust experiments config in `experiments_config.json` or generate new one with: `scripts/generate_experiments_config.py` script.
 4. Run experiment with:
 `python main.py`
