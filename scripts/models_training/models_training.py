@@ -12,7 +12,7 @@ from models.logistic_regression import LogisticRegressionModel
 from models.random_forest import RandomForestClassifierModel
 from models.decision_tree import DecisionTreeClassifierModel
 from models.knn import KNeighborsClassifierModel
-
+from scripts.models_training.models.catboost_model import CatBoostClassifierModel
 from scripts.models_training.models.xgboost_model import XGBoostClassifierModel
 
 # From utils includes
@@ -151,6 +151,14 @@ if __name__ == '__main__':
         'min_child_weight': [1, 3],  # Minimum sum of instance weights
         'use_label_encoder': [False],
     }
+    hyperparameter_grid_catboost = {
+        'iterations': [200, 300],
+        'depth': [6, 8],
+        'learning_rate': [0.1],
+        'l2_leaf_reg': [3, 5],
+        'bootstrap_type': ['Bernoulli'],
+        'subsample': [0.8]
+    }
 
     hyperparameter_grid_dt = {
         'random_state': [3],
@@ -171,8 +179,12 @@ if __name__ == '__main__':
     #             train_x_np, val_x_np, test_x_np, train_y, val_y, test_y, current_timestamp, hyperparameter_grid_rf)
 
     # Example for XGBoost
-    train_model(XGBoostClassifierModel, 'xgboost', train_labels, train_features, checkpoint_dir,
-                train_x_np, val_x_np, test_x_np, train_y, val_y, test_y, current_timestamp, hyperparameter_grid_xgb)
+    # train_model(XGBoostClassifierModel, 'xgboost', train_labels, train_features, checkpoint_dir,
+    #             train_x_np, val_x_np, test_x_np, train_y, val_y, test_y, current_timestamp, hyperparameter_grid_xgb)
+
+    # Example for CatBoost
+    train_model(CatBoostClassifierModel, 'catboost', train_labels, train_features, checkpoint_dir,
+                train_x_np, val_x_np, test_x_np, train_y, val_y, test_y, current_timestamp, hyperparameter_grid_catboost)
 
     # Example for Decision Tree
     # train_model(DecisionTreeClassifierModel, 'dt', train_labels, train_features, checkpoint_dir,
