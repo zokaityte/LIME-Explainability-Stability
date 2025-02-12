@@ -75,7 +75,7 @@ class LimeExperiment:
             test_instance = experiment_data.get_random_test_instance(1, class_label_to_test)
 
         explainer = LimeTabularExplainer(
-            training_data=experiment_data.get_training_data(),
+            training_data=experiment_data.get_training_data(imputed=True),
             mode=mode,
             feature_names=experiment_data.get_feature_names(),
             categorical_features=experiment_data.get_categorical_features(),

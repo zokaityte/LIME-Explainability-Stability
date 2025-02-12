@@ -21,14 +21,22 @@ class ExperimentData:
         self._categorical_features = None
         self._categorical_names = None
 
-    def get_training_data(self):
+    def get_training_data(self, imputed=False):
         train_data = pd.read_csv(self._train_data_csv_path, engine="pyarrow", usecols=self._column_names[:-1])
+
+        if imputed:
+            train_data.replace([float('inf'), float('-inf')], float('nan'), inplace=True)
+            imputer = SimpleImputer(strategy="mean")
+            train_data = imputer.fit_transform(train_data)
+            return train_data
+
         return train_data.to_numpy()
 
     def get_test_data(self, imputed=False):
         test_data = pd.read_csv(self._test_data_csv_path, engine="pyarrow", usecols=self._column_names[:-1])
 
         if imputed:
+            test_data.replace([float('inf'), float('-inf')], float('nan'), inplace=True)
             imputer = SimpleImputer(strategy="mean")
             test_data = imputer.fit_transform(test_data)
             return test_data
