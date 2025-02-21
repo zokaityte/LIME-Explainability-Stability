@@ -1,6 +1,11 @@
 # LIME Explainability Stability
 
-Exploring perturbation stategies to improve explainability stability.
+This repository contains the official implementation of the experiments from the paper:
+
+**["Comparative Analysis of Perturbation Techniques in LIME for Intrusion Detection Enhancement"](https://doi.org/10.3390/make7010021)**  
+*Mantas Bacevicius, Agne Paulauskaite-Taraseviciene, Gintare Zokaityte, Lukas Kersys, Agne Moleikaityte*  
+**Machine Learning and Knowledge Extraction,** MDPI, 2025  
+[DOI: 10.3390/make7010021](https://doi.org/10.3390/make7010021)
 
 Lime implementation based on: https://github.com/marcotcr/lime
 
